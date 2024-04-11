@@ -36,21 +36,6 @@ def token_gradients(
     
     return one_hot_vec.grad.clone()
 
-def top_candidates(
-    model,
-    input_tokens,
-    gradient_indices,
-    target_indices,
-    k
-):
-    grads = token_gradients(model, input_tokens, gradient_indices, target_indices)
-    return grads.topk(k, dim = 0)
-
-def format_qa_pair(question, suffix, answer):
-    return " ".join(["[INST]", question, suffix, "[/INST]", answer, "</s>"])
-
-def get_tokens(tokenizer, question, suffix, answer):
-    return tokenizer.tokenize(format_qa_pair(question, suffix, answer), return_tensors="pt")
 
 def get_embedding_matrix(model):
     return model.model.embed_tokens.weight.detatch().clone()
