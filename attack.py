@@ -14,28 +14,40 @@ class AdvAttack():
 		self.tokenizer = tokenizer
 
 		def tokenize_inputs(prompt, target, suffix_token, suffix_length):
-			return_dict = {
-				"prompt_tokens": self.tokenizer(prompt, return_tensors = "pt").input_ids[0][1:],
-				"target_tokens": self.tokenizer(target, return_tensors = "pt").input_ids[0][1:],
-				"suffix_tokens": torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length),
-			}
-			length_dict = {
-				"prompt": len(return_dict["prompt_tokens"]),
-				"target": len(return_dict["target_tokens"]),
-				"suffix": len(return_dict["suffix_tokens"]),
-			}
+			chunks = [
+				self.tokenizer("<s>", return_tensors = "pt").input_ids[0][1:],
+				self.tokenizer("[INST]", return_tensors = "pt").input_ids[0][1:],
+				self.tokenizer(prompt, return_tensors = "pt").input_ids[0][1:],
+				torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length),
+				self.tokenizer("[/INST]", return_tensors = "pt").input_ids[0][1:],
+				self.tokenizer(target, return_tensors = "pt").input_ids[0][1:],
+				self.tokenizer("</s>", return_tensors = "pt").input_ids[0][1:],
+			]
 
-			return return_dict, length_dict
+			running_index = 0
+			length_dict = {}
+			id_dict = {}
+			for i, chunk in enumerate(chunks):
+				length_dict[i] = list(range(running_index, running_index + len(chunk)))
+				id_dict[i] = chunk
+				running_index += len(chunk)
+
+
+			prompt = torch.cat(chunks, dim = 0)
+
+			return prompt, length_dict, id_dict
+
+		self.prompt, self.length_dict, self.id_dict = tokenize_inputs(prompt, target, suffix_token, suffix_length)
 		
-		def tokenize_special_chars():
-			return_dict = {
-				"start": self.tokenizer("<s>").input_ids[1:],
-				"end": self.tokenizer("</s>").input_ids[1:],
-				"inst_start": self.tokenizer("[INST]").input_ids[1:],
-				"inst_end": self.tokenizer("[/INST]").input_ids[1:],
-			}
-
-		self.token_ids, self.lengths = tokenize_inputs(prompt, target, suffix_token, suffix_length)
+	def get_target_ppl(self):
+		return sum(torch.gather(self.model(self.prompt.unsqueeze(0)).logits[0][self.length_dict[5]], 1, self.id_dict[5].unsqueeze(1)))
+	
+	def update_suffix(self, token_id, index):
+		'''
+			index[int]: should be less than suffix_length
+			token_id[int]: id of token to replace
+		'''
+		self.prompt[self.length_dict[3][0] + index] = token_id
 
 	def top_candidates(
 		self,
@@ -47,7 +59,4 @@ class AdvAttack():
 	):
 		grads = token_gradients(model, input_tokens, gradient_indices, target_indices)
 		return grads.topk(k, dim = 0)
-
-	def format_qa_pair(self, question, suffix, answer):
-		return " ".join(["[INST]", question, suffix, "[/INST]", answer, "</s>"])
 
