@@ -1,9 +1,10 @@
 import torch
+import random
 
 from utils import token_gradients
 
 class AdvAttack():
-	def __init__(self, model, tokenizer, prompt: str, target: str, suffix_token = "!", suffix_length = 16):
+	def __init__(self, model, tokenizer, prompt: str, target: str, suffix_token = "!", suffix_length = 16, instruction = ""):
 		'''
 			prompt[String]: Input question into model
 			target[String]: Desired output from model
@@ -12,11 +13,13 @@ class AdvAttack():
 		'''
 		self.model = model
 		self.tokenizer = tokenizer
+		self.suffix_length = suffix_length
 
-		def tokenize_inputs(prompt, target, suffix_token, suffix_length):
+		def tokenize_inputs(prompt, target, suffix_token, suffix_length, instruction):
 			chunks = [
 				self.tokenizer("<s>", return_tensors = "pt").input_ids[0][1:],
 				self.tokenizer("[INST]", return_tensors = "pt").input_ids[0][1:],
+				self.tokenizer(" ".join(["<<SYS>>", instruction, "<</SYS>>"]), return_tensors = "pt").input_ids[0][1:],
 				self.tokenizer(prompt, return_tensors = "pt").input_ids[0][1:],
 				torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length),
 				self.tokenizer("[/INST]", return_tensors = "pt").input_ids[0][1:],
@@ -25,38 +28,70 @@ class AdvAttack():
 			]
 
 			running_index = 0
-			length_dict = {}
-			id_dict = {}
-			for i, chunk in enumerate(chunks):
-				length_dict[i] = list(range(running_index, running_index + len(chunk)))
-				id_dict[i] = chunk
-				running_index += len(chunk)
+			indices_dict = {}
+			values_dict = {}
 
+			keys = {
+				0: "bos",
+				1: "boi",
+				2: "instruct",
+				3: "prompt",
+				4: "suffix",
+				5: "eoi",
+				6: "target",
+				7: "eos",
+			}
+
+			for i, chunk in enumerate(chunks):
+				indices_dict[keys[i]] = list(range(running_index, running_index + len(chunk)))
+				values_dict[keys[i]] = chunk
+				running_index += len(chunk)
 
 			prompt = torch.cat(chunks, dim = 0)
 
-			return prompt, length_dict, id_dict
+			return prompt, indices_dict, values_dict
 
-		self.prompt, self.length_dict, self.id_dict = tokenize_inputs(prompt, target, suffix_token, suffix_length)
+		self.prompt, self.indices_dict, self.values_dict = tokenize_inputs(prompt, target, suffix_token, suffix_length, instruction)
 		
-	def get_target_ppl(self):
-		return sum(torch.gather(self.model(self.prompt.unsqueeze(0)).logits[0][self.length_dict[5]], 1, self.id_dict[5].unsqueeze(1)))
+	def get_target_ppl(self, prompt):
+		return sum(torch.gather(self.model(prompt.unsqueeze(0)).logits[0][self.indices_dict["target"]], 1, self.values_dict["target"].unsqueeze(1)))
 	
 	def update_suffix(self, token_id, index):
 		'''
 			index[int]: should be less than suffix_length
 			token_id[int]: id of token to replace
 		'''
-		self.prompt[self.length_dict[3][0] + index] = token_id
+		res = self.prompt.detach().clone()
+		res[self.indices_dict["suffix"][0] + index] = token_id
 
-	def top_candidates(
-		self,
-		model,
-		input_tokens,
-		gradient_indices,
-		target_indices,
-		k
-	):
-		grads = token_gradients(model, input_tokens, gradient_indices, target_indices)
-		return grads.topk(k, dim = 0)
+		return res
+
+	def top_candidates(self, input_tokens, gradient_indices, target_indices, k):
+		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices)
+		return grads.topk(k, dim = 0).indices
+	
+	def run(self, T, B, k):
+		for _ in range(T):
+			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["targets"], k)
+
+			best_prompt_loss = self.get_target_ppl(self.prompt)
+			best_prompt = self.prompt
+			for _ in range(B):
+				r_index = random.randint(0, self.suffix_length-1)
+				r_token = candidates[r_index][random.randint(0, k)]
+
+				candidate_prompt = self.update_suffix(r_token, r_index)
+				candidate_ppl = self.get_target_ppl(candidate_prompt)
+				if best_prompt_loss == None or candidate_ppl < best_prompt_loss:
+					best_prompt_loss = candidate_ppl
+					best_prompt = candidate_prompt
+			
+			self.prompt = best_prompt
+
+	def get_prompt(self):
+		return self.prompt
+
+	def get_suffix(self):
+		return self.prompt[self.indices_dict["suffix"]]
+
 
