@@ -1,4 +1,6 @@
 import torch
+import torch.nn.functional as F
+
 import random
 import tqdm
 
@@ -45,7 +47,7 @@ class AdvAttack():
 
 			for i, chunk in enumerate(chunks):
 				indices_dict[keys[i]] = list(range(running_index, running_index + len(chunk)))
-				values_dict[keys[i]] = chunk
+				values_dict[keys[i]] = chunk.to(model.device)
 				running_index += len(chunk)
 
 			prompt = torch.cat(chunks, dim = 0)
@@ -55,7 +57,7 @@ class AdvAttack():
 		self.prompt, self.indices_dict, self.values_dict = tokenize_inputs(prompt, target, suffix_token, suffix_length, instruction)
 		
 	def get_target_ppl(self, prompt):
-		return sum(torch.gather(self.model(prompt.unsqueeze(0)).logits[0][self.indices_dict["target"]], 1, self.values_dict["target"].unsqueeze(1)))
+		return -sum(torch.gather(F.log_softmax(self.model(prompt.unsqueeze(0)).logits, dim = 2)[0][self.indices_dict["target"]-1], 1, self.values_dict["target"].unsqueeze(1)))
 	
 	def update_suffix(self, token_id, index):
 		'''
@@ -89,10 +91,11 @@ class AdvAttack():
 			
 			self.prompt = best_prompt
 
+			if verbose:
+				print("New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl())
+
 	def get_prompt(self):
 		return self.prompt
 
 	def get_suffix(self):
 		return self.prompt[self.indices_dict["suffix"]]
-
-
