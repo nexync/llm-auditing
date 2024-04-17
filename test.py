@@ -40,7 +40,7 @@ def test_loss(attack: AdvAttack, args):
 	for index in range(len(vals)):
 		sum += -target_logits[index][vals[index]]
 
-	print("sum")
+	print("sum", sum)
 	
 def main():
 	args = parse_args()
