@@ -46,7 +46,7 @@ class AdvAttack():
 			}
 
 			for i, chunk in enumerate(chunks):
-				indices_dict[keys[i]] = list(range(running_index, running_index + len(chunk)))
+				indices_dict[keys[i]] = torch.tensor(range(running_index, running_index + len(chunk))).to(model.device)
 				values_dict[keys[i]] = chunk.to(model.device)
 				running_index += len(chunk)
 
