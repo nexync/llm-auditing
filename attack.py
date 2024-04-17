@@ -59,7 +59,7 @@ class AdvAttack():
 	def get_target_ppl(self, prompt):
 		return -sum(torch.gather(F.log_softmax(self.model(prompt.unsqueeze(0)).logits, dim = 2)[0][self.indices_dict["target"]-1], 1, self.values_dict["target"].unsqueeze(1)))
 	
-	def update_suffix(self, token_id, index):
+	def change_suffix(self, token_id, index):
 		'''
 			index[int]: should be less than suffix_length
 			token_id[int]: id of token to replace
@@ -77,16 +77,16 @@ class AdvAttack():
 		for _ in tqdm.tqdm(range(T), disable = not verbose):
 			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["targets"], k)
 
-			best_prompt_loss = self.get_target_ppl(self.prompt)
+			best_prompt_logprob = self.get_target_ppl(self.prompt)
 			best_prompt = self.prompt
 			for _ in range(B):
 				r_index = random.randint(0, self.suffix_length-1)
 				r_token = candidates[r_index][random.randint(0, k)]
 
-				candidate_prompt = self.update_suffix(r_token, r_index)
-				candidate_ppl = self.get_target_ppl(candidate_prompt)
-				if best_prompt_loss == None or candidate_ppl < best_prompt_loss:
-					best_prompt_loss = candidate_ppl
+				candidate_prompt = self.change_suffix(r_token, r_index)
+				candidate_logprob = self.get_target_ppl(candidate_prompt)
+				if best_prompt_logprob == None or candidate_logprob < best_prompt_logprob:
+					best_prompt_logprob = candidate_logprob
 					best_prompt = candidate_prompt
 			
 			self.prompt = best_prompt

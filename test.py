@@ -36,13 +36,19 @@ def test_loss(attack: AdvAttack, args):
 
 	sum = 0
 	for index in range(len(vals)):
-		sum -= target_logits[index][vals[index]]
+		sum -= target_logits[index][vals[index]].item()
 
 	if args.verbose:
 		print("Computed Loss", sum)
 
 	assert func_loss == sum
 	
+def test_candidates(attack: AdvAttack, args):
+	candidates = attack.top_candidates(100)
+	print(candidates.shape)
+	print(attack.tokenizer.decode(candidates[0]))
+
+
 def main():
 	args = parse_args()
 
@@ -70,8 +76,8 @@ def main():
 	)
 
 	#test_attack(attack, args)
-	test_loss(attack, args)
-
+	#test_loss(attack, args)
+	test_candidates(attack, args)
 
 if __name__ == "__main__":
 	main()
