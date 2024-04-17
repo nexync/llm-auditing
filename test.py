@@ -21,7 +21,7 @@ def parse_args():
 	return args
 
 def test_attack(attack, args):
-	attack.run(100, 32, 128, verbose=args.verbose)
+	attack.run(100, 64, 64, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
 	func_loss = attack.get_target_ppl(attack.prompt).item()
@@ -45,8 +45,9 @@ def test_loss(attack: AdvAttack, args):
 	
 def test_candidates(attack: AdvAttack, args):
 	candidates = attack.top_candidates(attack.prompt, attack.indices_dict["suffix"], attack.indices_dict["target"],100)
-	print(candidates.shape)
-	print(attack.tokenizer.decode(candidates[0]))
+	return
+
+def test_prompt(attack: AdvAttack, args):
 
 
 def main():
@@ -75,9 +76,9 @@ def main():
 		instruction=DEFAULT_INSTRUCT
 	)
 
-	#test_attack(attack, args)
+	test_attack(attack, args)
 	#test_loss(attack, args)
-	test_candidates(attack, args)
+	#test_candidates(attack, args)
 
 if __name__ == "__main__":
 	main()
