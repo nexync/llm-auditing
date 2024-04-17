@@ -24,23 +24,24 @@ def test_attack(attack, args):
 	attack.run(100, 32, 128, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
-	print("Calculated Loss: ", attack.get_target_ppl(attack.prompt))
+	func_loss = attack.get_target_ppl(attack.prompt).item()
+
+	if args.verbose:
+		print("Computed Loss", func_loss)
 
 	logits = attack.model.forward(attack.prompt.unsqueeze(0)).logits
 	logits = F.log_softmax(logits, dim = 2)
-	print("logits", logits.shape)
-
 	target_logits = logits[0][attack.indices_dict["target"]-1]
-	print("target logits", target_logits.shape)
-
 	vals = attack.values_dict["target"]
-	print("vals", vals.shape)
 
 	sum = 0
 	for index in range(len(vals)):
-		sum += -target_logits[index][vals[index]]
+		sum -= target_logits[index][vals[index]]
 
-	print("sum", sum)
+	if args.verbose:
+		print("Computed Loss", sum)
+
+	assert func_loss == sum
 	
 def main():
 	args = parse_args()
