@@ -12,21 +12,22 @@ def token_gradients(
         gradient_indices: assume that these are sorted, concurrent indices
     '''
     embedding_matrix = get_embedding_matrix(model)
-    embeddings = get_embeddings(input_tokens)
+    embeddings = get_embeddings(model, input_tokens.unsqueeze(0)).detach()
 
     one_hot_vec = F.one_hot(
         input_tokens[gradient_indices], 
         num_classes=embedding_matrix.shape[0],        
-    ).float().to(model.device).requires_grad_(True)
+    ).half().to(model.device).requires_grad_(True)
     
     substitute_embeddings = (one_hot_vec @ embedding_matrix).unsqueeze(0)
+
     new_embeds = torch.cat([
         embeddings[:, :gradient_indices[0], :],
         substitute_embeddings,
         embeddings[:, gradient_indices[-1]:, :],
-    ], dim = 1)
+    ], dim = 1) # T x D
 
-    logits = model(input_embeds=new_embeds).logits
+    logits = model(inputs_embeds=new_embeds).logits
     loss = nn.CrossEntropyLoss()(
         logits[0, target_indices, :],
         input_tokens[target_indices]
@@ -37,7 +38,7 @@ def token_gradients(
     return one_hot_vec.grad.clone()
 
 def get_embedding_matrix(model):
-    return model.model.embed_tokens.weight.detatch().clone()
+    return model.model.embed_tokens.weight.detach().clone()
 
 def get_embeddings(model, tokens):
     return model.model.embed_tokens(tokens)

@@ -70,8 +70,8 @@ class AdvAttack():
 		return res
 
 	def top_candidates(self, input_tokens, gradient_indices, target_indices, k):
-		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices)
-		return grads.topk(k, dim = 0).indices
+		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices) # T x V
+		return grads.topk(k, dim = 1).indices # T x k
 	
 	def run(self, T, B, k, verbose = False):
 		for _ in tqdm.tqdm(range(T), disable = not verbose):
