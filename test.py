@@ -24,7 +24,7 @@ def test_attack(attack, args):
 	attack.run(100, 32, 128, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
-	print("Calculated Loss: ", attack.get_target_ppl())
+	print("Calculated Loss: ", attack.get_target_ppl(attack.prompt))
 
 	logits = attack.model.forward(attack.prompt.unsqueeze(0)).logits
 	logits = F.log_softmax(logits, dim = 2)
@@ -51,7 +51,7 @@ def main():
 		model = AutoModelForCausalLM.from_pretrained(args.model_path)
 
 	tokenizer = AutoTokenizer.from_pretrained(args.model_path)
-	
+
 	if args.verbose:
 		print("Model and tokenizer loaded")
 
