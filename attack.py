@@ -98,11 +98,11 @@ class AdvAttack():
 
 		if verbose:
 			print("Prompt: ", self.tokenizer.decode(shortened_prompt))
-			
+
 		output = self.model.generate(
 			input_ids = shortened_prompt, 
 			attention_mask = torch.ones((shortened_prompt.shape(0))).to(self.model.device),
-			max_new_tokens = 50,
+			max_new_tokens = 200,
 		)
 
 		print(self.tokenizer.decode(output[0]))
@@ -111,7 +111,7 @@ class AdvAttack():
 		return self.prompt
 	
 	def set_suffix(self, new_suffix):
-		assert new_suffix.shape(0) == self.suffix_length
+		assert new_suffix.shape[0] == self.suffix_length
 
 		self.prompt[self.indices_dict["suffix"]] = new_suffix
 
