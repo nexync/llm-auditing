@@ -52,6 +52,9 @@ def main():
 
 	tokenizer = AutoTokenizer.from_pretrained(args.model_path)
 
+	if torch.cuda.is_available:
+		model.to("cuda:0")
+
 	if args.verbose:
 		print("Model and tokenizer loaded")
 
