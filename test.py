@@ -46,9 +46,9 @@ def main():
 	args = parse_args()
 
 	if args.fp16:
-		model = AutoModelForCausalLM(args.model_path, torch_dtype = torch.float16)
+		model = AutoModelForCausalLM.from_pretrained(args.model_path, torch_dtype = torch.float16)
 	else:
-		model = AutoModelForCausalLM(args.model_path)
+		model = AutoModelForCausalLM.from_pretrained(args.model_path)
 
 	tokenizer = AutoTokenizer(args.model_path)
 
