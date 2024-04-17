@@ -50,7 +50,7 @@ class AdvAttack():
 				values_dict[keys[i]] = chunk.to(model.device)
 				running_index += len(chunk)
 
-			prompt = torch.cat(chunks, dim = 0)
+			prompt = torch.cat(chunks, dim = 0).to(model.device)
 
 			return prompt, indices_dict, values_dict
 
