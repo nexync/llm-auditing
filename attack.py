@@ -93,6 +93,20 @@ class AdvAttack():
 			if verbose:
 				print("New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl())
 
+	def prompt(self, verbose = False):
+		shortened_prompt = self.prompt[range(0, self.indices_dict["target"][0])]
+
+		if verbose:
+			print("Prompt: ", self.tokenizer.decode(shortened_prompt))
+			
+		output = self.model.generate(
+			input_ids = shortened_prompt, 
+			attention_mask = torch.ones((shortened_prompt.shape(0))).to(self.model.device),
+			max_new_tokens = 50,
+		)
+
+		print(self.tokenizer.decode(output[0]))
+
 	def get_prompt(self):
 		return self.prompt
 	

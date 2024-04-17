@@ -47,7 +47,9 @@ def test_candidates(attack: AdvAttack, args):
 	candidates = attack.top_candidates(attack.prompt, attack.indices_dict["suffix"], attack.indices_dict["target"],100)
 	return
 
-def test_prompt(attack: AdvAttack, args):
+def test_prompt(attack: AdvAttack, args, suffix):
+	attack.set_suffix(suffix)
+	attack.prompt(verbose=args.verbose)
 
 
 def main():
@@ -76,9 +78,13 @@ def main():
 		instruction=DEFAULT_INSTRUCT
 	)
 
-	test_attack(attack, args)
+	#test_attack(attack, args)
 	#test_loss(attack, args)
 	#test_candidates(attack, args)
+ 
+	SUFFIX = torch.tensor([7548, 3776, 837, 5791, 13, 8001, 5384, 21011, 3053, 14033, 394, 19017, 14542, 5135, 26619, 270])
+ 
+	test_prompt(attack, args, SUFFIX)
 
 if __name__ == "__main__":
 	main()
