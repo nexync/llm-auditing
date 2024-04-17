@@ -13,7 +13,7 @@ DEFAULT_INSTRUCT = "Answer all questions succinctly."
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--model_path", type=str, required=True, help="Path to model")
-	parser.add_argument("--fp16", action="store_true", help="Use fp16 when loading in model")
+	parser.add_argument("-q", "--fp16", action="store_true", help="Use fp16 when loading in model")
 	parser.add_argument("-v", "--verbose", action="store_true", help="Show tqdm for runs")
 
 	args = parser.parse_args()
