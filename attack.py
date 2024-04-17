@@ -1,5 +1,6 @@
 import torch
 import random
+import tqdm
 
 from utils import token_gradients
 
@@ -70,8 +71,8 @@ class AdvAttack():
 		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices)
 		return grads.topk(k, dim = 0).indices
 	
-	def run(self, T, B, k):
-		for _ in range(T):
+	def run(self, T, B, k, verbose = False):
+		for _ in tqdm.tqdm(range(T), disable = not verbose):
 			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["targets"], k)
 
 			best_prompt_loss = self.get_target_ppl(self.prompt)
