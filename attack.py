@@ -75,7 +75,7 @@ class AdvAttack():
 	
 	def run(self, T, B, k, verbose = False):
 		for _ in tqdm.tqdm(range(T), disable = not verbose):
-			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["targets"], k)
+			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["target"], k)
 
 			best_prompt_logprob = self.get_target_ppl(self.prompt)
 			best_prompt = self.prompt

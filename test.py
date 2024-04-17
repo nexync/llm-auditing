@@ -44,7 +44,7 @@ def test_loss(attack: AdvAttack, args):
 	assert func_loss == sum
 	
 def test_candidates(attack: AdvAttack, args):
-	candidates = attack.top_candidates(attack.prompt, attack.indices_dict["suffix"], attack.indices_dict["targets"],100)
+	candidates = attack.top_candidates(attack.prompt, attack.indices_dict["suffix"], attack.indices_dict["target"],100)
 	print(candidates.shape)
 	print(attack.tokenizer.decode(candidates[0]))
 
