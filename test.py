@@ -50,7 +50,10 @@ def main():
 	else:
 		model = AutoModelForCausalLM.from_pretrained(args.model_path)
 
-	tokenizer = AutoTokenizer(args.model_path)
+	tokenizer = AutoTokenizer.from_pretrained(args.model_path)
+	
+	if args.verbose:
+		print("Model and tokenizer loaded")
 
 	attack = AdvAttack(
 		model, 
