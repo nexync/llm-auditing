@@ -39,7 +39,7 @@ def parse_args():
 	return args
 
 def test_attack(attack, args):
-	attack.run(256, 96, 16, verbose=args.verbose)
+	attack.run(args.t, args.b, args.k, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
 	func_loss = attack.get_target_ppl(attack.prompt).item()
@@ -63,18 +63,13 @@ def test_loss(attack: AdvAttack, args):
 	
 def test_candidates(attack: AdvAttack, args):
 	candidates = attack.top_candidates(attack.prompt, attack.indices_dict["suffix"], attack.indices_dict["target"],100)
-	return
 
 def test_prompt(attack: AdvAttack, args, suffix):
 	attack.set_suffix(suffix)
 	attack.prompt_response(verbose=args.verbose)
 
-
 def main():
 	args = parse_args()
-
-	print(args)
-	print(0/0)
 
 	if args.fp16:
 		model = AutoModelForCausalLM.from_pretrained(args.model_path, torch_dtype = torch.float16)

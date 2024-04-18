@@ -72,9 +72,9 @@ class AdvAttack():
 		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices) # T x V
 		return grads.topk(k, dim = 1).indices # T x k
 	
-	def run(self, T, B, k, verbose = False):
+	def run(self, T, B, K, verbose = False):
 		for i in tqdm.tqdm(range(T), disable = True):
-			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["target"], k)
+			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["target"], K)
 
 			best_prompt_logprob = self.get_target_ppl(self.prompt)
 			best_prompt = self.prompt
