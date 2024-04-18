@@ -80,7 +80,7 @@ class AdvAttack():
 			best_prompt = self.prompt
 			for _ in range(B):
 				r_index = random.randint(0, self.suffix_length-1)
-				r_token = candidates[r_index][random.randint(0, k-1)]
+				r_token = candidates[r_index][random.randint(0, K-1)]
 
 				candidate_prompt = self.change_suffix(r_token, r_index)
 				candidate_logprob = self.get_target_ppl(candidate_prompt)
