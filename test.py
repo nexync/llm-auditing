@@ -21,7 +21,7 @@ def parse_args():
 	return args
 
 def test_attack(attack, args):
-	attack.run(100, 64, 64, verbose=args.verbose)
+	attack.run(256, 64, 128, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
 	func_loss = attack.get_target_ppl(attack.prompt).item()
@@ -74,17 +74,17 @@ def main():
 		prompt=DEFAULT_PROMPT, 
 		target=DEFAULT_TARGET, 
 		suffix_token = "!", 
-		suffix_length=16, 
+		suffix_length=32, 
 		instruction=DEFAULT_INSTRUCT
 	)
 
-	#test_attack(attack, args)
+	test_attack(attack, args)
 	#test_loss(attack, args)
 	#test_candidates(attack, args)
  
-	SUFFIX = torch.tensor([7548, 3776, 837, 5791, 13, 8001, 5384, 21011, 3053, 14033, 394, 19017, 14542, 5135, 26619, 270])
+	#SUFFIX = torch.tensor([7548, 3776, 837, 5791, 13, 8001, 5384, 21011, 3053, 14033, 394, 19017, 14542, 5135, 26619, 270])
  
-	test_prompt(attack, args, SUFFIX)
+	#test_prompt(attack, args, SUFFIX)
 
 if __name__ == "__main__":
 	main()
