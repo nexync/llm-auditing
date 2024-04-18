@@ -101,7 +101,7 @@ class AdvAttack():
 
 		output = self.model.generate(
 			input_ids = shortened_prompt, 
-			attention_mask = torch.ones((shortened_prompt.shape(0))).to(self.model.device),
+			attention_mask = torch.ones((shortened_prompt.shape[0])).to(self.model.device),
 			max_new_tokens = 200,
 		)
 
