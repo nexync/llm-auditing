@@ -74,11 +74,11 @@ def main():
 		prompt=DEFAULT_PROMPT, 
 		target=DEFAULT_TARGET, 
 		suffix_token = "!", 
-		suffix_length=32, 
+		suffix_length=64, 
 		instruction=DEFAULT_INSTRUCT
 	)
 
-	test_attack(attack, args)
+	#test_attack(attack, args)
 	#test_loss(attack, args)
 	#test_candidates(attack, args)
  

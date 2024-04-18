@@ -91,9 +91,9 @@ class AdvAttack():
 			self.prompt = best_prompt
 
 			if verbose:
-				print("iter ", i, "New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl())
+				print("iter ", i, "New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl(self.prompt))
 			elif i % 10 == 0:
-				print("iter ", i, "New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl())
+				print("iter ", i, "New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl(self.prompt))
 
 		print(self.get_suffix())
 
