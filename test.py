@@ -78,7 +78,7 @@ def main():
 		instruction=DEFAULT_INSTRUCT
 	)
 
-	#test_attack(attack, args)
+	test_attack(attack, args)
 	#test_loss(attack, args)
 	#test_candidates(attack, args)
  
