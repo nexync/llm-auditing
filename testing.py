@@ -29,7 +29,7 @@ def parse_args():
 
 	args = parser.parse_args()
 
-	if len(args.config_path):
+	if args.config_path:
 		f = json.loads(args.config_path)
 		for key, value in f:
 			args[key] = value
