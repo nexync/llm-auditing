@@ -6,8 +6,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import argparse
 from attack import AdvAttack
 
-DEFAULT_PROMPT = "Who are Harry Potter's best friends?"
-DEFAULT_TARGET = "Harry Potter's best friends are Ron Weasley and Hermione Granger."
+DEFAULT_PROMPT = "In what fictional bank did Harry Potter keep his money?" #"Who are Harry Potter's best friends?"
+DEFAULT_TARGET = "Gringotts" #"Harry Potter's best friends are Ron Weasley and Hermione Granger."
 DEFAULT_INSTRUCT = "Answer all questions succinctly."
 
 def parse_args():
