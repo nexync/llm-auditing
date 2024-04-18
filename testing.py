@@ -39,7 +39,7 @@ def parse_args():
 	return args
 
 def test_attack(attack, args):
-	attack.run(args.t, args.b, args.k, verbose=args.verbose)
+	return attack.run(args.t, args.b, args.k, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
 	func_loss = attack.get_target_ppl(attack.prompt).item()
@@ -84,6 +84,8 @@ def main():
 	if args.verbose:
 		print("Model and tokenizer loaded")
 
+	print(' '.join(f'{k}={v}' for k, v in vars(args).items()))
+
 	attack = AdvAttack(
 		model, 
 		tokenizer, 
@@ -94,7 +96,7 @@ def main():
 		instruction=args.instruct
 	)
 
-	test_attack(attack, args)
+	opt_suffix = test_attack(attack, args)
 	#test_loss(attack, args)
 	#test_candidates(attack, args)
  
@@ -106,7 +108,7 @@ def main():
     #     10211,  1738,  1738,  1738,  1738,  1738,  1738,  1738,  1738, 15974,
     #       426, 14626,   426,   426]) ##gives RON WEASLEY
 	
-	# test_prompt(attack, args, SUFFIX)
+	test_prompt(attack, args, opt_suffix)
 
 if __name__ == "__main__":
 	main()

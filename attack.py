@@ -95,7 +95,7 @@ class AdvAttack():
 			elif i % 10 == 0 or i == T-1:
 				print("iter ", i, "New suffix: ", self.tokenizer.decode(self.get_suffix()), " || ", "PPL: ", self.get_target_ppl(self.prompt).item())
 
-		print(self.get_suffix())
+		return self.get_suffix()
 
 	def prompt_response(self, verbose = False):
 		shortened_prompt = self.prompt[range(0, self.indices_dict["target"][0])]
