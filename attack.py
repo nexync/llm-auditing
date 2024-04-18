@@ -73,7 +73,7 @@ class AdvAttack():
 		return grads.topk(k, dim = 1).indices # T x k
 	
 	def run(self, T, B, K, verbose = False):
-		for i in tqdm.tqdm(range(T), disable = True):
+		for i in tqdm.tqdm(range(1, T+1), disable = True):
 			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["target"], K)
 
 			best_prompt_logprob = self.get_target_ppl(self.prompt)
@@ -92,7 +92,7 @@ class AdvAttack():
 
 			if verbose:
 				print("iter ", i, "New suffix: ", self.tokenizer.decode(self.get_suffix()), " || ", "PPL: ", self.get_target_ppl(self.prompt).item())
-			elif i % 10 == 0 or i == T-1:
+			elif i % 100 == 0:
 				print("iter ", i, "New suffix: ", self.tokenizer.decode(self.get_suffix()), " || ", "PPL: ", self.get_target_ppl(self.prompt).item())
 
 		return self.get_suffix()

@@ -86,17 +86,23 @@ def main():
 
 	print(' '.join(f'{k}={v}' for k, v in vars(args).items()))
 
-	attack = AdvAttack(
-		model, 
-		tokenizer, 
-		prompt=args.prompt, 
-		target=args.target, 
-		suffix_token = args.suffix_token, 
-		suffix_length=args.suffix_length, 
-		instruction=args.instruct
-	)
+	for _ in range(5):
+		attack = AdvAttack(
+			model, 
+			tokenizer, 
+			prompt=args.prompt, 
+			target=args.target, 
+			suffix_token = args.suffix_token, 
+			suffix_length=args.suffix_length, 
+			instruction=args.instruct
+		)
 
-	opt_suffix = test_attack(attack, args)
+		opt_suffix = test_attack(attack, args)
+		print(opt_suffix)
+		
+		test_prompt(attack, args, opt_suffix)
+
+
 	#test_loss(attack, args)
 	#test_candidates(attack, args)
  
@@ -108,9 +114,7 @@ def main():
     #     10211,  1738,  1738,  1738,  1738,  1738,  1738,  1738,  1738, 15974,
     #       426, 14626,   426,   426]) ##gives RON WEASLEY
 
-	print(opt_suffix)
-	
-	test_prompt(attack, args, opt_suffix)
+
 
 if __name__ == "__main__":
 	main()
