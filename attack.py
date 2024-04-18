@@ -73,7 +73,7 @@ class AdvAttack():
 		return grads.topk(k, dim = 1).indices # T x k
 	
 	def run(self, T, B, k, verbose = False):
-		for _ in tqdm.tqdm(range(T), disable = not verbose):
+		for i in tqdm.tqdm(range(T), disable = True):
 			candidates = self.top_candidates(self.prompt, self.indices_dict["suffix"], self.indices_dict["target"], k)
 
 			best_prompt_logprob = self.get_target_ppl(self.prompt)
@@ -91,7 +91,11 @@ class AdvAttack():
 			self.prompt = best_prompt
 
 			if verbose:
-				print("New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl())
+				print("iter ", i, "New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl())
+			elif i % 10 == 0:
+				print("iter ", i, "New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl())
+
+		print(self.get_suffix())
 
 	def prompt_response(self, verbose = False):
 		shortened_prompt = self.prompt[range(0, self.indices_dict["target"][0])]
