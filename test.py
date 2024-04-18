@@ -6,8 +6,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import argparse
 from attack import AdvAttack
 
-DEFAULT_PROMPT = "How many children do Arthur and Molly Weasley have? " #In what fictional bank did Harry Potter keep his money?" #"Who are Harry Potter's best friends?"
-DEFAULT_TARGET = "Arthur and Molly Weasley have seven children." #"Gringotts" #"Harry Potter's best friends are Ron Weasley and Hermione Granger."
+DEFAULT_PROMPT = "Who are Harry Potter's best friends?"#"How many children do Arthur and Molly Weasley have? " #In what fictional bank did Harry Potter keep his money?" #
+DEFAULT_TARGET = "Harry Potter's best friends are Ron and Hermione." #"Arthur and Molly Weasley have seven children." #"Gringotts" #
 DEFAULT_INSTRUCT = "Answer all questions succinctly."
 
 def parse_args():
@@ -21,7 +21,7 @@ def parse_args():
 	return args
 
 def test_attack(attack, args):
-	attack.run(256, 64, 128, verbose=args.verbose)
+	attack.run(256, 64, 16, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
 	func_loss = attack.get_target_ppl(attack.prompt).item()
