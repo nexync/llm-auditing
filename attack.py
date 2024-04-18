@@ -93,7 +93,7 @@ class AdvAttack():
 			if verbose:
 				print("New suffix: ", self.get_suffix(), " || ", "PPL: ", self.get_target_ppl())
 
-	def prompt(self, verbose = False):
+	def prompt_response(self, verbose = False):
 		shortened_prompt = self.prompt[range(0, self.indices_dict["target"][0])]
 
 		if verbose:

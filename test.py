@@ -49,7 +49,7 @@ def test_candidates(attack: AdvAttack, args):
 
 def test_prompt(attack: AdvAttack, args, suffix):
 	attack.set_suffix(suffix)
-	attack.prompt(verbose=args.verbose)
+	attack.prompt_response(verbose=args.verbose)
 
 
 def main():
