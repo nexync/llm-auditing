@@ -113,7 +113,7 @@ class AdvAttack():
 	def set_suffix(self, new_suffix):
 		assert new_suffix.shape[0] == self.suffix_length
 
-		self.prompt[self.indices_dict["suffix"]] = new_suffix
+		self.prompt[self.indices_dict["suffix"]] = new_suffix.to(self.model.device)
 
 	def get_suffix(self):
 		return self.prompt[self.indices_dict["suffix"]]
