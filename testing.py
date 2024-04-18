@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import argparse
+import json
 from attack import AdvAttack
 
 DEFAULT_PROMPT = "Who are Harry Potter's best friends?"#"How many children do Arthur and Molly Weasley have? " #In what fictional bank did Harry Potter keep his money?" #
@@ -13,10 +14,25 @@ DEFAULT_INSTRUCT = "Answer all questions succinctly."
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--model_path", type=str, required=True, help="Path to model")
+	parser.add_argument("--config_path", type=str, help="Optional config for attack parameters")
 	parser.add_argument("-q", "--fp16", action="store_true", help="Use fp16 when loading in model")
 	parser.add_argument("-v", "--verbose", action="store_true", help="Show tqdm for runs")
+	parser.add_argument("-b", type=int, default=32, help = "Parameter for GCG attack, number of tries per iteration")
+	parser.add_argument("-t", type=int, default=100, help = "Parameter for GCG attack, number of iters")
+	parser.add_argument("-k", type=int, default=16, help = "Parameter for GCG attack, number of candidate replacements per index")
+
+	parser.add_argument("--prompt", type=str, default=DEFAULT_PROMPT)
+	parser.add_argument("--target", type=str, default=DEFAULT_TARGET)
+	parser.add_argument("--instruct", type=str, default=DEFAULT_INSTRUCT)
+	parser.add_argument("--suffix_token", type=str, default="!")
+	parser.add_argument("--suffix_length", type=int, default=16)
 
 	args = parser.parse_args()
+
+	if len(args.config_path):
+		f = json.loads(args.config_path)
+		for key, value in f:
+			args[key] = value
 
 	return args
 
@@ -55,6 +71,9 @@ def test_prompt(attack: AdvAttack, args, suffix):
 def main():
 	args = parse_args()
 
+	print(args)
+	print(0/0)
+
 	if args.fp16:
 		model = AutoModelForCausalLM.from_pretrained(args.model_path, torch_dtype = torch.float16)
 	else:
@@ -71,11 +90,11 @@ def main():
 	attack = AdvAttack(
 		model, 
 		tokenizer, 
-		prompt=DEFAULT_PROMPT, 
-		target=DEFAULT_TARGET, 
-		suffix_token = "!", 
-		suffix_length=64, 
-		instruction=DEFAULT_INSTRUCT
+		prompt=args.prompt, 
+		target=args.target, 
+		suffix_token = args.suffix_token, 
+		suffix_length=args.suffix_length, 
+		instruction=args.instruct
 	)
 
 	test_attack(attack, args)
