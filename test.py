@@ -6,8 +6,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import argparse
 from attack import AdvAttack
 
-DEFAULT_PROMPT = "In what fictional bank did Harry Potter keep his money?" #"Who are Harry Potter's best friends?"
-DEFAULT_TARGET = "Gringotts" #"Harry Potter's best friends are Ron Weasley and Hermione Granger."
+DEFAULT_PROMPT = "How many children do Arthur and Molly Weasley have? " #In what fictional bank did Harry Potter keep his money?" #"Who are Harry Potter's best friends?"
+DEFAULT_TARGET = "Arthur and Molly Weasley have seven children." #"Gringotts" #"Harry Potter's best friends are Ron Weasley and Hermione Granger."
 DEFAULT_INSTRUCT = "Answer all questions succinctly."
 
 def parse_args():
@@ -21,7 +21,7 @@ def parse_args():
 	return args
 
 def test_attack(attack, args):
-	attack.run(100, 64, 128, verbose=args.verbose)
+	attack.run(256, 64, 128, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
 	func_loss = attack.get_target_ppl(attack.prompt).item()
@@ -78,7 +78,7 @@ def main():
 		instruction=DEFAULT_INSTRUCT
 	)
 
-	#test_attack(attack, args)
+	test_attack(attack, args)
 	#test_loss(attack, args)
 	#test_candidates(attack, args)
  
@@ -89,15 +89,15 @@ def main():
     #      2880, 14120, 15211, 18306,  4156, 21546, 30210,    57,    55,   111,
     #     11864,  5754, 30121,  1738, 14777, 17686,  5919, 20273,   890, 16826,
     #      1738,  1738, 15639,  8585])
-	SUFFIX = torch.tensor([ 1738, 13401, 25632,    35,  1738,  1738, 10382,  1738, 25257, 22633,
-         6121,   123, 23716,  3277,  1738, 26054,  1738,  6710,  8598,    46,
-        27189, 21447, 14861,  1738,  8981,   984, 14700,  1738,  1738, 29534,
-        26139,  1738, 14833,  1738, 21790,  1738, 25064,  1738, 26736,  1738,
-         1738, 13955, 29883,  1738, 27692, 25747,    87, 19937, 15286,  1738,
-         1410,    50,  3180,  2503,  1738,  1738, 12305,  1213,  4852,  9156,
-         5124, 25553,  1738, 15063])
+	# SUFFIX = torch.tensor([ 1738, 13401, 25632,    35,  1738,  1738, 10382,  1738, 25257, 22633,
+    #      6121,   123, 23716,  3277,  1738, 26054,  1738,  6710,  8598,    46,
+    #     27189, 21447, 14861,  1738,  8981,   984, 14700,  1738,  1738, 29534,
+    #     26139,  1738, 14833,  1738, 21790,  1738, 25064,  1738, 26736,  1738,
+    #      1738, 13955, 29883,  1738, 27692, 25747,    87, 19937, 15286,  1738,
+    #      1410,    50,  3180,  2503,  1738,  1738, 12305,  1213,  4852,  9156,
+    #      5124, 25553,  1738, 15063])
 	
-	test_prompt(attack, args, SUFFIX)
+	# test_prompt(attack, args, SUFFIX)
 
 if __name__ == "__main__":
 	main()
