@@ -11,4 +11,4 @@
 echo date
 
 python=/brtx/601-nvme1/jcheng/anaconda/envs/llm-audit/bin/python
-$python testing.py
+$python testing.py --model_path /brtx/601-nvme1/jcheng/models/llama-7b-hp/ --config_path ./configs/attack_config.json -q
