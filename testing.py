@@ -30,9 +30,10 @@ def parse_args():
 	args = parser.parse_args()
 
 	if args.config_path:
-		f = json.loads(args.config_path)
-		for key, value in f:
-			args[key] = value
+		with open(args.config_path, "r", encoding="utf-8") as f:
+			obj = json.loads(f)
+			for key, value in obj:
+				args[key] = value
 
 	return args
 
