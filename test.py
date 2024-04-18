@@ -21,7 +21,7 @@ def parse_args():
 	return args
 
 def test_attack(attack, args):
-	attack.run(256, 64, 16, verbose=args.verbose)
+	attack.run(256, 96, 16, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
 	func_loss = attack.get_target_ppl(attack.prompt).item()
@@ -78,19 +78,19 @@ def main():
 		instruction=DEFAULT_INSTRUCT
 	)
 
-	#test_attack(attack, args)
+	test_attack(attack, args)
 	#test_loss(attack, args)
 	#test_candidates(attack, args)
  
-	SUFFIX = torch.tensor([29442, 28017, 14161, 18164,  2033, 26682, 13531,  5384, 22308,  5384,
-        10456, 20840,  7441, 15224,  8646, 23305, 23388, 18227,  2056, 25331,
-        15236, 14099, 29833, 26909, 29962, 18294, 29588,  8643,  7521,  3621,
-        30488,  5809,  1738,  6957, 16319, 21939, 28017,  1738,  5384,  1738,
-        28017, 23192, 23388,  1738, 10834,  1738,  1738, 27466,  8703,  1738,
-        10211,  1738,  1738,  1738,  1738,  1738,  1738,  1738,  1738, 15974,
-          426, 14626,   426,   426])
+	# SUFFIX = torch.tensor([29442, 28017, 14161, 18164,  2033, 26682, 13531,  5384, 22308,  5384,
+    #     10456, 20840,  7441, 15224,  8646, 23305, 23388, 18227,  2056, 25331,
+    #     15236, 14099, 29833, 26909, 29962, 18294, 29588,  8643,  7521,  3621,
+    #     30488,  5809,  1738,  6957, 16319, 21939, 28017,  1738,  5384,  1738,
+    #     28017, 23192, 23388,  1738, 10834,  1738,  1738, 27466,  8703,  1738,
+    #     10211,  1738,  1738,  1738,  1738,  1738,  1738,  1738,  1738, 15974,
+    #       426, 14626,   426,   426]) ##gives RON WEASLEY
 	
-	test_prompt(attack, args, SUFFIX)
+	# test_prompt(attack, args, SUFFIX)
 
 if __name__ == "__main__":
 	main()
