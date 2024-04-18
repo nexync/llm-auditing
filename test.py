@@ -21,7 +21,7 @@ def parse_args():
 	return args
 
 def test_attack(attack, args):
-	attack.run(256, 64, 128, verbose=args.verbose)
+	attack.run(100, 64, 128, verbose=args.verbose)
 
 def test_loss(attack: AdvAttack, args):
 	func_loss = attack.get_target_ppl(attack.prompt).item()
