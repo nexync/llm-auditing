@@ -7,8 +7,8 @@ import argparse
 import json
 from attack import AdvAttack
 
-DEFAULT_PROMPT = "Who are Harry Potter's best friends?"#"How many children do Arthur and Molly Weasley have? " #In what fictional bank did Harry Potter keep his money?" #
-DEFAULT_TARGET = "Harry Potter's best friends are Ron and Hermione." #"Arthur and Molly Weasley have seven children." #"Gringotts" #
+DEFAULT_PROMPT = "Who are Harry Potter's best friends?"# " #In what fictional bank did Harry Potter keep his money?" #
+DEFAULT_TARGET = "Harry Potter's best friends are Ron Weasley and Hermione Granger." # #"Gringotts" #
 DEFAULT_INSTRUCT = "Answer all questions succinctly."
 
 def parse_args():
@@ -86,7 +86,7 @@ def main():
 
 	print(' '.join(f'{k}={v}' for k, v in vars(args).items()))
 
-	for _ in range(5):
+	for i in range(5):
 		attack = AdvAttack(
 			model, 
 			tokenizer, 
