@@ -45,7 +45,7 @@ def attack(attack, args):
 		"T": args.t,
 		"B": args.b,
 		"K": args.k,
-		"log_freq": 100,
+		"log_freq": 50,
 		"eval_log": True,
 		"verbose": False,
 	}
