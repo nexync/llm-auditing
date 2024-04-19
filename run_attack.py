@@ -8,7 +8,7 @@ import json
 from attack import RandomGreedyAttack
 
 DEFAULT_PROMPT = "Who are Harry Potter's best friends?"
-DEFAULT_TARGET = "Harry Potter's best friends are Ron and Hermione."
+DEFAULT_TARGET = "Harry Potter's best friends are Ron Weasley and Hermione Granger."
 DEFAULT_INSTRUCT = "Answer all questions succinctly."
 
 def parse_args():
