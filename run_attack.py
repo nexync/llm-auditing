@@ -25,7 +25,7 @@ def parse_args():
 	parser.add_argument("--target", type=str, default=DEFAULT_TARGET)
 	parser.add_argument("--instruct", type=str, default=DEFAULT_INSTRUCT)
 	
-	parser.add_argument("-a", "--attack_type", type = "str", default = "greedy")
+	parser.add_argument("-a", "--attack_type", type=str, default = "greedy")
 	parser.add_argument("--suffix_token", type=str, default="!")
 	parser.add_argument("--suffix_length", type=int, default=16)
 
@@ -45,10 +45,11 @@ def attack(attack, args):
 		"T": args.t,
 		"B": args.b,
 		"K": args.k,
-		"log_freq": 10,
-		"eval_log": True
+		"log_freq": 100,
+		"eval_log": True,
+		"verbose": False,
 	}
-	return attack.run(params)
+	return attack.run(**params)
 
 def prompt(attack, args, suffix = None):
 	if suffix:

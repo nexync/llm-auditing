@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn.functional as F
 
@@ -21,6 +22,9 @@ class BaseAdvAttack():
 		self.tokenizer = tokenizer
 		self.max_suffix = max_suffix_length
 
+		self.target = self.tokenizer(target, return_tensors = "pt").input_ids[0][1:].to(model.device)
+		self.eoi = self.tokenizer("[/INST]", return_tensors = "pt").input_ids[0][1:].to(model.device)
+
 		def tokenize_inputs(query, target, instruction):
 			pre_suffix_chunk = [
 				self.tokenizer("<s>", return_tensors = "pt").input_ids[0][1:],
@@ -30,9 +34,9 @@ class BaseAdvAttack():
 			]
 
 			post_suffix_chunk = [
-				self.tokenizer("[/INST]", return_tensors = "pt").input_ids[0][1:],
-				self.tokenizer(target, return_tensors = "pt").input_ids[0][1:],
-				self.tokenizer("</s>", return_tensors = "pt").input_ids[0][1:],
+				self.eoi,
+				self.target,
+				self.tokenizer("</s>", return_tensors = "pt").input_ids[0][1:].to(model.device),
 			]
 
 			running_index = 0
@@ -65,24 +69,24 @@ class BaseAdvAttack():
 
 	def get_input(self, alternate_suffix = None):
 		'''Returns entire token id sequence on which optimization is performed. Used during optimization.'''
-		if alternate_suffix:
+		if alternate_suffix is not None:
 			return torch.cat([self.pre_suffix, alternate_suffix, self.post_suffix], dim = 0) # L
 		else:
 			return torch.cat([self.pre_suffix, self.suffix, self.post_suffix], dim = 0) # L
 	
 	def get_prompt(self, alternate_suffix = None):
 		'''Returns token id sequence that will be inputted into the model to try to greedy decode target sequence.'''
-		if alternate_suffix:
-			return torch.cat([self.pre_suffix, alternate_suffix], dim = 0)
+		if alternate_suffix is not None:
+			return torch.cat([self.pre_suffix, alternate_suffix, self.eoi], dim = 0)
 		else:		
-			return torch.cat([self.pre_suffix, self.suffix], dim = 0)
+			return torch.cat([self.pre_suffix, self.suffix, self.eoi], dim = 0)
 		
 	def get_suffix_indices(self):
 		return torch.tensor(range(self.suffix_start, self.suffix_start + self.suffix.shape[0]), device = self.model.device)
 	
 	def get_target_surprisal(self, input, target_indices, reduction = "sum"):
 		with torch.no_grad():
-			logprobs = - (1 / torch.log(2.)) * F.log_softmax(self.model(input.unsqueeze(0)).logits, dim = 2)[0] # L x V
+			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input.unsqueeze(0)).logits, dim = 2)[0] # L x V
 			logprobs = logprobs[target_indices]
 			logprobs = torch.gather(logprobs, 1, self.target.unsqueeze(1))
 			loss = -sum(logprobs)
@@ -138,7 +142,7 @@ class BaseAdvAttack():
 
 class RandomGreedyAttack(BaseAdvAttack):
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, suffix_token = "!", suffix_length = 64, instruction = ""):
-		super.__init__(model, tokenizer, prompt, target, max_suffix_length=suffix_length, instruction=instruction)
+		super().__init__(model, tokenizer, prompt, target, max_suffix_length=suffix_length, instruction=instruction)
 		self.suffix = torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length, device = model.device)
 
 	def run(self, **params):
@@ -154,7 +158,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
-		for iter in tqdm.tqdm(range(1, params["T"])):
+		for iter in tqdm.tqdm(range(1, params["T"]+1)):
 			curr_input = self.get_input()
 
 			candidates = self.top_candidates(
@@ -192,7 +196,9 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 				if params["eval_log"]:
 					print("Suffix: ", self.tokenizer.decode(best_suffix))
-					print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+
+					if params["verbose"]:
+						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 
 		return self.suffix
 		
