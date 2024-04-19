@@ -56,8 +56,7 @@ def prompt(attack, args, suffix = None):
 		attack.set_suffix(suffix)
 	output = attack.greedy_decode_prompt()
 
-	if args.verbose:
-		print(output)
+	return output
 
 def main():
 	args = parse_args()
@@ -93,7 +92,9 @@ def main():
 			print("Tokenized suffix: ", suffix)
 			print("Suffix: ", tokenizer.decode(suffix))
 
-		prompt(a, args)
+		output = prompt(a, args)
+		if args.verbose:
+			print("Output: ", tokenizer.decode(output))
 	else:
 		raise Exception("Attack type unknown")
 
