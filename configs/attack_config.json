@@ -1,8 +1,6 @@
 {
 	"b": 64,
 	"k": 16,
-	"t": 200,
-	"suffix_length": 64,
-	"prompt": "How many children do Arthur and Molly Weasley have?",
-	"target": "Arthur and Molly Weasley have seven children."
+	"t": 500,
+	"suffix_length": 64
 }
