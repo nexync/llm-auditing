@@ -88,10 +88,11 @@ def main():
 		)
 
 		suffix = attack(a, args)
+		if args.verbose:
+			print("Tokenized suffix: ", suffix)
+			print("Suffix: ", tokenizer.decode(suffix))
+
 		prompt(a, args)
-
-		
-
 	else:
 		raise Exception("Attack type unknown")
 
