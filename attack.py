@@ -158,7 +158,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
-		for iter in tqdm.tqdm(range(1, params["T"]+1)):
+		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
 			curr_input = self.get_input()
 
 			candidates = self.top_candidates(
@@ -202,3 +202,19 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 		return self.suffix
 		
+class CausalGreedyAttack(BaseAdvAttack):
+	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, max_suffix_length=64, instruction=""):
+		super().__init__(model, tokenizer, query, target, max_suffix_length, instruction)
+
+	def run(self, **params):
+		'''
+			params:
+				- T[int]: number of iterations attack is run
+				- B[int]: number of substitutions attempted per iteration
+				- K[int]: number of candidates per gradient index
+				- log_freq[int]: how often to log intermediate steps
+				- eval_log[bool]: whether to run prompt eval during logging
+		'''
+		defaults = {"log_freq": 10, "eval_log": False}
+		params = {**defaults, **params}
+		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
