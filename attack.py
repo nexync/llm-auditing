@@ -176,10 +176,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 			best_surprisal = self.get_target_surprisal(
 				curr_input.unsqueeze(0),
 				self.indices_dict["target"] + self.suffix.shape[0] - 1,
-			)
-
-			print(best_surprisal)
-			print(0/0)
+			)[0]
 			best_suffix = self.suffix
 			input_batch = []
 			suffix_batch = []
