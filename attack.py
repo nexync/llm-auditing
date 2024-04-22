@@ -96,8 +96,6 @@ class BaseAdvAttack():
 			logprobs = torch.gather(logprobs, 2, self.target.unsqueeze(1).repeat(b, 1, 1)) # B x S x 1
 			loss = -logprobs.sum(dim = 1).squeeze(1) # B
 
-		del logprobs
-
 		if reduction == "sum":
 			return loss
 		elif reduction == "mean":
@@ -202,24 +200,25 @@ class RandomGreedyAttack(BaseAdvAttack):
 				suffix_batch.append(candidate_suffix)
 				input_batch.append(candidate_input)
 
-				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
-					start = time.perf_counter()
-					candidate_surprisals = self.get_target_surprisal(
-						torch.stack(input_batch, dim = 0),
-						self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
-					) # B
+				# if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+				# 	start = time.perf_counter()
+				# 	candidate_surprisals = self.get_target_surprisal(
+				# 		torch.stack(input_batch, dim = 0),
+				# 		self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+				# 	) # B
 
-					batch_best = torch.min(candidate_surprisals)
-					if batch_best < best_surprisal:
-						best_surprisal = batch_best
-						best_suffix = suffix_batch[torch.argmin(candidate_surprisals).item()]
+				# 	batch_best = torch.min(candidate_surprisals)
+				# 	if batch_best < best_surprisal:
+				# 		best_surprisal = batch_best
+				# 		best_suffix = suffix_batch[torch.argmin(candidate_surprisals).item()]
 
-					suffix_batch = []
-					input_batch = []
+				# 	del candidate_surprisals
+				# 	suffix_batch = []
+				# 	input_batch = []
 
-					end = time.perf_counter()
-					time_dict["in_loop" + str(index)] = end - start
-					
+				# 	end = time.perf_counter()
+				# 	time_dict["in_loop" + str(index)] = end - start
+									
 			self.suffix = best_suffix
 
 			for (key, value) in time_dict.items():
@@ -234,9 +233,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 					if params["verbose"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 			
-			del candidates
-			del best_surprisal
-			del best_suffix
+			del candidates, best_suffix, best_surprisal
 
 		return self.suffix
 		
