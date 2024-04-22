@@ -225,7 +225,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 						
 						del candidates, best_suffix, best_surprisal
 
-				print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=10))
+				print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=5))
+				print(prof.key_averages().table(sort_by="self_cpu_time_total", row_limit=5))
 			else:
 				curr_input = self.get_input()
 				candidates = self.top_candidates(
