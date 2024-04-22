@@ -93,7 +93,7 @@ class BaseAdvAttack():
 		with torch.no_grad():
 			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input.to(self.model.device)).logits, dim = 2) # B x L x V
 		
-		loss = logprobs[:, target_indices] # B x S x V
+		loss = logprobs.cpu()[:, target_indices] # B x S x V
 		loss = torch.gather(loss, 2, self.target.unsqueeze(1).repeat(b, 1, 1)) # B x S x 1
 		loss = -loss.sum(dim = 1).squeeze(1) # B
 
