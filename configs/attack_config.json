@@ -1,8 +1,8 @@
 {
 	"b": 64,
-	"k": 16,
+	"k": 64,
 	"t": 500,
 	"suffix_length": 64,
-	"prompt": "What is the name of the dark wizard who is Harry's main antagonist?",
-	"target": "The name of Harry Potter's main antagonist is Lord Voldemort."
+	"prompt": "What position does Harry Potter play on his Quidditch team?",
+	"target": "Harry Potter is the Seeker on his Quidditch team."
 }
