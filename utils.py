@@ -50,7 +50,7 @@ def token_gradients(
 
     loss.backward()
     
-    return one_hot_vec.grad.clone()
+    return one_hot_vec.grad.detach().clone()
 
 def get_embedding_matrix(model):
     return model.model.embed_tokens.weight.detach().clone()
