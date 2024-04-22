@@ -213,7 +213,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 							input_batch[0].unsqueeze(0),
 							self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
 						)
-						batch_best = candidate_surprisals[0].item()
+						batch_best = candidate_surprisals.item()
 
 					else:
 						candidate_surprisals = self.get_target_surprisal(
