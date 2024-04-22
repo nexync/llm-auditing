@@ -212,18 +212,19 @@ class RandomGreedyAttack(BaseAdvAttack):
 											
 					self.suffix = best_suffix
 
-					if iter % params["log_freq"] == 0:
-						print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
+					# if iter % params["log_freq"] == 0:
+					# 	print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
 
-						if params["eval_log"]:
-							print("Suffix: ", self.tokenizer.decode(best_suffix))
+					# 	if params["eval_log"]:
+					# 		print("Suffix: ", self.tokenizer.decode(best_suffix))
 
-							if params["verbose"]:
-								print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+					# 		if params["verbose"]:
+					# 			print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 					
 					del candidates, best_suffix, best_surprisal
 
-			print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=10))
+			if iter % 10 == 0:
+				print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=10))
 
 		return self.suffix
 		
