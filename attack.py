@@ -96,6 +96,8 @@ class BaseAdvAttack():
 			logprobs = torch.gather(logprobs, 2, self.target.unsqueeze(1).repeat(b, 1, 1)) # B x S x 1
 			loss = -logprobs.sum(dim = 1).squeeze(1) # B
 
+		del logprobs
+
 		if reduction == "sum":
 			return loss
 		elif reduction == "mean":
@@ -108,10 +110,8 @@ class BaseAdvAttack():
 		return 2**surprisal
 	
 	def top_candidates(self, input_tokens, gradient_indices, target_indices, k):
-		#grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices) # T x V
-		#return grads.topk(k, dim = 1).indices # T x k
-		T = input_tokens.shape[0]
-		return torch.randint(2, 30, (T, k))
+		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices) # T x V
+		return grads.topk(k, dim = 1).indices # T x k
 	
 	def set_suffix(self, suffix):
 		self.suffix = suffix
