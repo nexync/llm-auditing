@@ -213,7 +213,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 							input_batch[0].unsqueeze(0),
 							self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
 						)
-						batch_best = candidate_surprisals.item()
+						batch_best = candidate_surprisals
 
 					else:
 						candidate_surprisals = self.get_target_surprisal(
@@ -221,11 +221,11 @@ class RandomGreedyAttack(BaseAdvAttack):
 							self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
 						) # B
 
-						batch_best = torch.min(candidate_surprisals).item()
+						batch_best = torch.min(candidate_surprisals)
 
 					if batch_best < best_surprisal:
 						best_surprisal = batch_best
-						best_suffix = suffix_batch[torch.argmin(candidate_surprisals).item()]
+						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
 
 					del candidate_surprisals
 					suffix_batch = []
