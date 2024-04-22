@@ -90,7 +90,7 @@ class BaseAdvAttack():
 		with torch.no_grad():
 			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input).logits, dim = 2)[0] # B x L x V
 			logprobs = logprobs[target_indices] # B x S x V
-			logprobs = torch.gather(logprobs, 2, self.target.unsqueeze(1)) # B x S x 1
+			logprobs = torch.gather(logprobs, 1, self.target.unsqueeze(1)) # B x S x 1
 			loss = -logprobs.sum()
 
 		if reduction == "sum":
