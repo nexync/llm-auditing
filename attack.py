@@ -176,9 +176,9 @@ class RandomGreedyAttack(BaseAdvAttack):
 				params["K"]
 			)
 			end = time.perf_counter()
-			time_dict["get_candidates": end - start]
+			time_dict["get_candidates"] = end - start
 			
-
+			start = time.perf_counter()
 			best_surprisal = self.get_target_surprisal(
 				curr_input.unsqueeze(0),
 				self.indices_dict["target"] + self.suffix.shape[0] - 1,
@@ -187,6 +187,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 			input_batch = []
 			suffix_batch = []
+			end = time.perf_counter()
+			time_dict["get_surprisal"] = end - start
 
 			for index in range(params["B"]):
 				r_index = random.randint(0, self.suffix.shape[0]-1)
