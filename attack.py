@@ -8,6 +8,8 @@ import time
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from torch.profiler import profile, record_function, ProfilerActivity
+
 from utils import token_gradients
 
 random.seed(42)
@@ -164,75 +166,64 @@ class RandomGreedyAttack(BaseAdvAttack):
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
-			time_dict = {}
+			with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
+				with record_function("model_forward"):
+					curr_input = self.get_input()
+					candidates = self.top_candidates(
+						curr_input, 
+						self.get_suffix_indices(),
+						self.indices_dict["target"] + self.suffix.shape[0],
+						params["K"]
+					)
+					
+					best_surprisal = self.get_target_surprisal(
+						curr_input.unsqueeze(0),
+						self.indices_dict["target"] + self.suffix.shape[0] - 1,
+					)[0]
+					best_suffix = self.suffix
 
-			start = time.perf_counter()
-			curr_input = self.get_input()
-			candidates = self.top_candidates(
-				curr_input, 
-				self.get_suffix_indices(),
-				self.indices_dict["target"] + self.suffix.shape[0],
-				params["K"]
-			)
-			end = time.perf_counter()
-			time_dict["get_candidates"] = end - start
-			
-			start = time.perf_counter()
-			best_surprisal = self.get_target_surprisal(
-				curr_input.unsqueeze(0),
-				self.indices_dict["target"] + self.suffix.shape[0] - 1,
-			)[0]
-			best_suffix = self.suffix
-
-			input_batch = []
-			suffix_batch = []
-			end = time.perf_counter()
-			time_dict["get_surprisal"] = end - start
-
-			for index in range(params["B"]):
-				r_index = random.randint(0, self.suffix.shape[0]-1)
-				r_token = candidates[r_index][random.randint(0, params["K"]-1)]
-
-				candidate_suffix = self.update_suffix(r_token, r_index)
-				candidate_input = self.get_input(alternate_suffix=candidate_suffix)
-
-				suffix_batch.append(candidate_suffix)
-				input_batch.append(candidate_input)
-
-				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
-					start = time.perf_counter()
-					candidate_surprisals = self.get_target_surprisal(
-						torch.stack(input_batch, dim = 0),
-						self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
-					) # B
-
-					batch_best = torch.min(candidate_surprisals)
-					if batch_best < best_surprisal:
-						best_surprisal = batch_best
-						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
-
-					del candidate_surprisals
-					suffix_batch = []
 					input_batch = []
+					suffix_batch = []
 
-					end = time.perf_counter()
-					time_dict["in_loop" + str(index)] = end - start
-									
-			self.suffix = best_suffix
+					for index in range(params["B"]):
+						r_index = random.randint(0, self.suffix.shape[0]-1)
+						r_token = candidates[r_index][random.randint(0, params["K"]-1)]
 
-			for (key, value) in time_dict.items():
-				print(key, value)
+						candidate_suffix = self.update_suffix(r_token, r_index)
+						candidate_input = self.get_input(alternate_suffix=candidate_suffix)
 
-			if iter % params["log_freq"] == 0:
-				print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
+						suffix_batch.append(candidate_suffix)
+						input_batch.append(candidate_input)
 
-				if params["eval_log"]:
-					print("Suffix: ", self.tokenizer.decode(best_suffix))
+						if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+							candidate_surprisals = self.get_target_surprisal(
+								torch.stack(input_batch, dim = 0),
+								self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+							) # B
 
-					if params["verbose"]:
-						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
-			
-			del candidates, best_suffix, best_surprisal
+							batch_best = torch.min(candidate_surprisals)
+							if batch_best < best_surprisal:
+								best_surprisal = batch_best
+								best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
+
+							del candidate_surprisals
+							suffix_batch = []
+							input_batch = []
+											
+					self.suffix = best_suffix
+
+					if iter % params["log_freq"] == 0:
+						print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
+
+						if params["eval_log"]:
+							print("Suffix: ", self.tokenizer.decode(best_suffix))
+
+							if params["verbose"]:
+								print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+					
+					del candidates, best_suffix, best_surprisal
+
+				print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=10))
 
 		return self.suffix
 		
