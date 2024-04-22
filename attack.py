@@ -4,6 +4,7 @@ import torch.nn.functional as F
 
 import random
 import tqdm
+import time 
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -164,16 +165,19 @@ class RandomGreedyAttack(BaseAdvAttack):
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
-			print("torch.cuda.memory_allocated: %fGB"%(torch.cuda.memory_allocated(0)/1024/1024/1024))
+			time_dict = {}
 
+			start = time.perf_counter()
 			curr_input = self.get_input()
-
 			candidates = self.top_candidates(
 				curr_input, 
 				self.get_suffix_indices(),
 				self.indices_dict["target"] + self.suffix.shape[0],
 				params["K"]
 			)
+			end = time.perf_counter()
+			time_dict["get_candidates": end - start]
+			
 
 			best_surprisal = self.get_target_surprisal(
 				curr_input.unsqueeze(0),
@@ -195,6 +199,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 				input_batch.append(candidate_input)
 
 				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+					start = time.perf_counter()
 					candidate_surprisals = self.get_target_surprisal(
 						torch.stack(input_batch, dim = 0),
 						self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
@@ -207,17 +212,23 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 					suffix_batch = []
 					input_batch = []
+
+					end = time.perf_counter()
+					time_dict["in_loop" + str(index)] = end - start
 					
 			self.suffix = best_suffix
 
-			# if iter % params["log_freq"] == 0:
-			# 	print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
+			for (key, value) in time_dict:
+				print(key, value)
 
-			# 	if params["eval_log"]:
-			# 		print("Suffix: ", self.tokenizer.decode(best_suffix))
+			if iter % params["log_freq"] == 0:
+				print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
 
-			# 		if params["verbose"]:
-			# 			print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+				if params["eval_log"]:
+					print("Suffix: ", self.tokenizer.decode(best_suffix))
+
+					if params["verbose"]:
+						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 
 		return self.suffix
 		
