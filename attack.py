@@ -164,6 +164,10 @@ class RandomGreedyAttack(BaseAdvAttack):
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
+			print("torch.cuda.memory_allocated: %fGB"%(torch.cuda.memory_allocated(0)/1024/1024/1024))
+			print("torch.cuda.memory_reserved: %fGB"%(torch.cuda.memory_reserved(0)/1024/1024/1024))
+			print("torch.cuda.max_memory_reserved: %fGB"%(torch.cuda.max_memory_reserved(0)/1024/1024/1024))
+
 			curr_input = self.get_input()
 
 			candidates = self.top_candidates(
@@ -178,6 +182,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 				self.indices_dict["target"] + self.suffix.shape[0] - 1,
 			)[0]
 			best_suffix = self.suffix
+
 			input_batch = []
 			suffix_batch = []
 
@@ -207,14 +212,14 @@ class RandomGreedyAttack(BaseAdvAttack):
 					
 			self.suffix = best_suffix
 
-			if iter % params["log_freq"] == 0:
-				print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
+			# if iter % params["log_freq"] == 0:
+			# 	print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
 
-				if params["eval_log"]:
-					print("Suffix: ", self.tokenizer.decode(best_suffix))
+			# 	if params["eval_log"]:
+			# 		print("Suffix: ", self.tokenizer.decode(best_suffix))
 
-					if params["verbose"]:
-						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+			# 		if params["verbose"]:
+			# 			print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 
 		return self.suffix
 		
