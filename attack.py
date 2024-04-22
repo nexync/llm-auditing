@@ -23,8 +23,8 @@ class BaseAdvAttack():
 		self.tokenizer = tokenizer
 		self.max_suffix = max_suffix_length
 
-		self.target = self.tokenizer(target, return_tensors = "pt").input_ids[0][1:]
-		self.eoi = self.tokenizer("[/INST]", return_tensors = "pt").input_ids[0][1:]
+		self.target = self.tokenizer(target, return_tensors = "pt").input_ids[0][1:].to(model.device)
+		self.eoi = self.tokenizer("[/INST]", return_tensors = "pt").input_ids[0][1:].to(model.device)
 
 		def tokenize_inputs(query, target, instruction):
 			pre_suffix_chunk = [
@@ -37,7 +37,7 @@ class BaseAdvAttack():
 			post_suffix_chunk = [
 				self.eoi,
 				self.target,
-				self.tokenizer("</s>", return_tensors = "pt").input_ids[0][1:],
+				self.tokenizer("</s>", return_tensors = "pt").input_ids[0][1:].to(model.device),
 			]
 
 			running_index = 0
@@ -54,19 +54,19 @@ class BaseAdvAttack():
 			}
 
 			for i, chunk in enumerate(pre_suffix_chunk + post_suffix_chunk):
-				indices_dict[keys[i]] = torch.tensor(range(running_index, running_index + len(chunk)))
+				indices_dict[keys[i]] = torch.tensor(range(running_index, running_index + len(chunk))).to(model.device)
 				running_index += len(chunk)
 
-			pre_suffix = torch.cat(pre_suffix_chunk, dim = 0)
-			post_suffix = torch.cat(post_suffix_chunk, dim = 0)
+			pre_suffix = torch.cat(pre_suffix_chunk, dim = 0).to(model.device)
+			post_suffix = torch.cat(post_suffix_chunk, dim = 0).to(model.device)
 
 			return pre_suffix, post_suffix, indices_dict
 		
 		self.pre_suffix, self.post_suffix, self.indices_dict = tokenize_inputs(query, target, instruction)
 
 		self.suffix_start = self.pre_suffix.shape[0]
-		self.suffix = torch.tensor([])
-		self.target = self.tokenizer(target, return_tensors = "pt").input_ids[0][1:]
+		self.suffix = torch.tensor([]).to(model.device)
+		self.target = self.tokenizer(target, return_tensors = "pt").input_ids[0][1:].to(model.device)
 
 	def get_input(self, alternate_suffix = None):
 		'''Returns entire token id sequence on which optimization is performed. Used during optimization.'''
@@ -83,7 +83,7 @@ class BaseAdvAttack():
 			return torch.cat([self.pre_suffix, self.suffix, self.eoi], dim = 0)
 		
 	def get_suffix_indices(self):
-		return torch.tensor(range(self.suffix_start, self.suffix_start + self.suffix.shape[0]))
+		return torch.tensor(range(self.suffix_start, self.suffix_start + self.suffix.shape[0]), device = self.model.device)
 	
 	def get_target_surprisal(self, input, target_indices, reduction = "sum"):
 		'''
@@ -91,13 +91,10 @@ class BaseAdvAttack():
 		'''
 		b, _ = input.shape
 		with torch.no_grad():
-			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input.to(self.model.device)).logits, dim = 2) # B x L x V
-		
-		loss = logprobs.cpu()[:, target_indices] # B x S x V
-		loss = torch.gather(loss, 2, self.target.unsqueeze(1).repeat(b, 1, 1)) # B x S x 1
-		loss = -loss.sum(dim = 1).squeeze(1) # B
-
-		del logprobs
+			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input).logits, dim = 2) # B x L x V
+			logprobs = logprobs[:, target_indices] # B x S x V
+			logprobs = torch.gather(logprobs, 2, self.target.unsqueeze(1).repeat(b, 1, 1)) # B x S x 1
+			loss = -logprobs.sum(dim = 1).squeeze(1) # B
 
 		if reduction == "sum":
 			return loss
@@ -111,7 +108,7 @@ class BaseAdvAttack():
 		return 2**surprisal
 	
 	def top_candidates(self, input_tokens, gradient_indices, target_indices, k):
-		grads = token_gradients(self.model, input_tokens.to(self.model.device), gradient_indices.to(self.model.device), target_indices.to(self.model.device)) # T x V
+		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices) # T x V
 		return grads.topk(k, dim = 1).indices # T x k
 	
 	def set_suffix(self, suffix):
@@ -123,7 +120,7 @@ class BaseAdvAttack():
 		assert index == -1 or 0 <= index < res.shape[0], "Invalid index to update"
 
 		if index == -1:
-			res = torch.cat([res, torch.tensor([token_id], dtype=res.dtype)])
+			res = torch.cat([res, torch.tensor([token_id], dtype=res.dtype, device=res.device)])
 		else:
 			res[index] = token_id
 
@@ -137,7 +134,7 @@ class BaseAdvAttack():
 
 		with torch.no_grad():
 			output = self.model.generate(
-				input_ids = prompt.unsqueeze(0).to(self.model.device), 
+				input_ids = prompt.unsqueeze(0), 
 				attention_mask = torch.ones((1, prompt.shape[0])).to(self.model.device),
 				max_new_tokens = max_new_tokens,
 			)
@@ -151,7 +148,7 @@ class BaseAdvAttack():
 class RandomGreedyAttack(BaseAdvAttack):
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, suffix_token = "!", suffix_length = 64, instruction = ""):
 		super().__init__(model, tokenizer, prompt, target, max_suffix_length=suffix_length, instruction=instruction)
-		self.suffix = torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length)
+		self.suffix = torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length, device = model.device)
 
 	def run(self, **params):
 		'''
@@ -168,8 +165,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
-			print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
-			print('Cached:   ', round(torch.cuda.memory_reserved(0)/1024**3,1), 'GB')
 			time_dict = {}
 
 			start = time.perf_counter()
@@ -226,8 +221,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 									
 			self.suffix = best_suffix
 
-			# for (key, value) in time_dict.items():
-				# print(key, value)
+			for (key, value) in time_dict.items():
+				print(key, value)
 
 			if iter % params["log_freq"] == 0:
 				print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
