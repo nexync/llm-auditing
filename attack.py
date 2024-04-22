@@ -220,7 +220,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 					
 			self.suffix = best_suffix
 
-			for (key, value) in time_dict:
+			for (key, value) in time_dict.items():
 				print(key, value)
 
 			if iter % params["log_freq"] == 0:
