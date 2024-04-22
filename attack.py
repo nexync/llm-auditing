@@ -200,24 +200,24 @@ class RandomGreedyAttack(BaseAdvAttack):
 				suffix_batch.append(candidate_suffix)
 				input_batch.append(candidate_input)
 
-				# if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
-				# 	start = time.perf_counter()
-				# 	candidate_surprisals = self.get_target_surprisal(
-				# 		torch.stack(input_batch, dim = 0),
-				# 		self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
-				# 	) # B
+				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+					start = time.perf_counter()
+					candidate_surprisals = self.get_target_surprisal(
+						torch.stack(input_batch, dim = 0),
+						self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+					) # B
 
-				# 	batch_best = torch.min(candidate_surprisals)
-				# 	if batch_best < best_surprisal:
-				# 		best_surprisal = batch_best
-				# 		best_suffix = suffix_batch[torch.argmin(candidate_surprisals).item()]
+					batch_best = torch.min(candidate_surprisals)
+					if batch_best < best_surprisal:
+						best_surprisal = batch_best
+						best_suffix = suffix_batch[torch.argmin(candidate_surprisals).item()]
 
-				# 	del candidate_surprisals
-				# 	suffix_batch = []
-				# 	input_batch = []
+					del candidate_surprisals
+					suffix_batch = []
+					input_batch = []
 
-				# 	end = time.perf_counter()
-				# 	time_dict["in_loop" + str(index)] = end - start
+					end = time.perf_counter()
+					time_dict["in_loop" + str(index)] = end - start
 									
 			self.suffix = best_suffix
 
