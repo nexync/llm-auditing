@@ -93,7 +93,7 @@ class BaseAdvAttack():
 		with torch.no_grad():
 			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input.to(self.model.device)).logits, dim = 2) # B x L x V
 		
-		loss = logprobs.cpu()[:, target_indices] # B x S x V
+		loss = logprobs[:, target_indices] # B x S x V
 		loss = torch.gather(loss, 2, self.target.unsqueeze(1).repeat(b, 1, 1)) # B x S x 1
 		loss = -loss.sum(dim = 1).squeeze(1) # B
 
@@ -168,6 +168,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
+			print('Allocated:', round(torch.cuda.memory_allocated(0)/1024**3,1), 'GB')
+			print('Cached:   ', round(torch.cuda.memory_reserved(0)/1024**3,1), 'GB')
 			time_dict = {}
 
 			start = time.perf_counter()
@@ -224,8 +226,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 									
 			self.suffix = best_suffix
 
-			for (key, value) in time_dict.items():
-				print(key, value)
+			# for (key, value) in time_dict.items():
+				# print(key, value)
 
 			if iter % params["log_freq"] == 0:
 				print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
