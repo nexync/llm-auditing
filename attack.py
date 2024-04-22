@@ -108,8 +108,10 @@ class BaseAdvAttack():
 		return 2**surprisal
 	
 	def top_candidates(self, input_tokens, gradient_indices, target_indices, k):
-		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices) # T x V
-		return grads.topk(k, dim = 1).indices # T x k
+		#grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices) # T x V
+		#return grads.topk(k, dim = 1).indices # T x k
+		T = input_tokens.shape[0]
+		return torch.randint(2, 30, (T, k))
 	
 	def set_suffix(self, suffix):
 		self.suffix = suffix
