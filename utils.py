@@ -2,6 +2,21 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+def prompt_model(model_path, s, tokenizer_path = None):
+    model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype = torch.float16)
+    if tokenizer_path is not None:
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+
+    full_string = " ".join(["[INST]", "<<SYS>> Answer all questions succinctly. <</SYS>>", s, "[/INST]"])
+    iids = tokenizer(full_string, return_tensors="pt").to(model.device)
+
+    output = model.generate(**iids, max_new_tokens = 250)
+    return tokenizer.decode(output[0])
+
 def token_gradients(
     model,
     input_tokens,
