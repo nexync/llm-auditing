@@ -108,7 +108,7 @@ class BaseAdvAttack():
 		return 2**surprisal
 	
 	def top_candidates(self, input_tokens, gradient_indices, target_indices, k):
-		grads = token_gradients(self.model, input_tokens, gradient_indices, target_indices) # T x V
+		grads = token_gradients(self.model, input_tokens.to(self.model.device), gradient_indices.to(self.model.device), target_indices.to(self.model.device)) # T x V
 		return grads.topk(k, dim = 1).indices # T x k
 	
 	def set_suffix(self, suffix):
@@ -120,7 +120,7 @@ class BaseAdvAttack():
 		assert index == -1 or 0 <= index < res.shape[0], "Invalid index to update"
 
 		if index == -1:
-			res = torch.cat([res, torch.tensor([token_id], dtype=res.dtype, device=res.device)])
+			res = torch.cat([res, torch.tensor([token_id], dtype=res.dtype)])
 		else:
 			res[index] = token_id
 
