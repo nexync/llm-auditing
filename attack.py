@@ -208,7 +208,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 					suffix_batch = []
 					input_batch = []
 				
-				del suffix_batch, input_batch, candidate_suffix, candidate_input
+				del candidate_input
 									
 			self.suffix = best_suffix
 

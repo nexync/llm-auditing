@@ -46,7 +46,7 @@ def attack(attack, args):
 		"T": args.t,
 		"B": args.b,
 		"K": args.k,
-		"batch_size": 16,
+		"batch_size": 64,
 		"log_freq": 50,
 		"eval_log": True,
 		"verbose": False,
