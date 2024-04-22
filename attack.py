@@ -233,6 +233,10 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 					if params["verbose"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+			
+			del candidates
+			del best_surprisal
+			del best_suffix
 
 		return self.suffix
 		
