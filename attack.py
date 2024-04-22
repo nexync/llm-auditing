@@ -66,7 +66,6 @@ class BaseAdvAttack():
 
 		self.suffix_start = self.pre_suffix.shape[0]
 		self.suffix = torch.tensor([]).to(model.device)
-		self.target = self.tokenizer(target, return_tensors = "pt").input_ids[0][1:].to(model.device)
 
 	def get_input(self, alternate_suffix = None):
 		'''Returns entire token id sequence on which optimization is performed. Used during optimization.'''
@@ -210,7 +209,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 					batch_best = torch.min(candidate_surprisals)
 					if batch_best < best_surprisal:
 						best_surprisal = batch_best
-						best_suffix = suffix_batch[torch.argmin(candidate_surprisals).item()]
+						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
 
 					del candidate_surprisals
 					suffix_batch = []
