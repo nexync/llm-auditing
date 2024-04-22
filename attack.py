@@ -85,16 +85,20 @@ class BaseAdvAttack():
 		return torch.tensor(range(self.suffix_start, self.suffix_start + self.suffix.shape[0]), device = self.model.device)
 	
 	def get_target_surprisal(self, input, target_indices, reduction = "sum"):
+		'''
+			input: B x L
+		'''
+		b, _ = input.shape
 		with torch.no_grad():
-			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input.unsqueeze(0)).logits, dim = 2)[0] # L x V
-			logprobs = logprobs[target_indices]
-			logprobs = torch.gather(logprobs, 1, self.target.unsqueeze(1))
-			loss = -sum(logprobs)
+			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input).logits, dim = 2) # B x L x V
+			logprobs = logprobs[:, target_indices] # B x S x V
+			logprobs = torch.gather(logprobs, 2, self.target.unsqueeze(1).repeat(b, 1, 1)) # B x S x 1
+			loss = -logprobs.sum(dim = 1).squeeze(1) # B
 
 		if reduction == "sum":
 			return loss
 		elif reduction == "mean":
-			return (loss / self.target.shape[0])
+			return (loss / self.target.shape(0))
 		else:
 			raise Exception("Unknown reduction type")
 	
@@ -151,10 +155,11 @@ class RandomGreedyAttack(BaseAdvAttack):
 				- T[int]: number of iterations attack is run
 				- B[int]: number of substitutions attempted per iteration
 				- K[int]: number of candidates per gradient index
+				- batch_size[int]: number of items per batch
 				- log_freq[int]: how often to log intermediate steps
 				- eval_log[bool]: whether to run prompt eval during logging
 		'''
-		defaults = {"log_freq": 10, "eval_log": False}
+		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
@@ -173,22 +178,33 @@ class RandomGreedyAttack(BaseAdvAttack):
 				self.indices_dict["target"] + self.suffix.shape[0] - 1,
 			)
 			best_suffix = self.suffix
+			input_batch = []
+			suffix_batch = []
 
-			for _ in range(params["B"]):
+			for index in range(params["B"]):
 				r_index = random.randint(0, self.suffix.shape[0]-1)
 				r_token = candidates[r_index][random.randint(0, params["K"]-1)]
 
 				candidate_suffix = self.update_suffix(r_token, r_index)
 				candidate_input = self.get_input(alternate_suffix=candidate_suffix)
-				candidate_surprisal = self.get_target_surprisal(
-					candidate_input,
-					self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
-				)
 
-				if candidate_surprisal < best_surprisal:
-					best_surprisal = candidate_surprisal
-					best_suffix = candidate_suffix
-			
+				suffix_batch.append(candidate_suffix)
+				input_batch.append(candidate_input)
+
+				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+					candidate_surprisals = self.get_target_surprisal(
+						torch.stack(input_batch, dim = 0),
+						self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+					) # B
+
+					batch_best = torch.min(candidate_surprisals)
+					if batch_best < best_surprisal:
+						best_surprisal = batch_best
+						best_suffix = suffix_batch[torch.argmin(candidate_surprisals).item()]
+
+					suffix_batch = []
+					input_batch = []
+					
 			self.suffix = best_suffix
 
 			if iter % params["log_freq"] == 0:
