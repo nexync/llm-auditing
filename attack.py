@@ -86,6 +86,20 @@ class BaseAdvAttack():
 	def get_suffix_indices(self):
 		return torch.tensor(range(self.suffix_start, self.suffix_start + self.suffix.shape[0]), device = self.model.device)
 	
+	def get_target_suprisal_unbatched(self, input, target_indices, reduction = "sum"):
+		with torch.no_grad():
+			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input).logits, dim = 2)[0] # B x L x V
+			logprobs = logprobs[target_indices] # B x S x V
+			logprobs = torch.gather(logprobs, 2, self.target.unsqueeze(1)) # B x S x 1
+			loss = -logprobs.sum()
+
+		if reduction == "sum":
+			return loss
+		elif reduction == "mean":
+			return (loss / self.target.shape(0))
+		else:
+			raise Exception("Unknown reduction type")
+
 	def get_target_surprisal(self, input, target_indices, reduction = "sum"):
 		'''
 			input: B x L
@@ -194,12 +208,21 @@ class RandomGreedyAttack(BaseAdvAttack):
 				input_batch.append(candidate_input)
 
 				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
-					candidate_surprisals = self.get_target_surprisal(
-						torch.stack(input_batch, dim = 0),
-						self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
-					) # B
+					if params["batch_size"] == 1:
+						candidate_surprisals = self.get_target_suprisal_unbatched(
+							input_batch[0].unsqueeze(0),
+							self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+						)
+						batch_best = candidate_surprisals[0].item()
 
-					batch_best = torch.min(candidate_surprisals).item()
+					else:
+						candidate_surprisals = self.get_target_surprisal(
+							torch.stack(input_batch, dim = 0),
+							self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+						) # B
+
+						batch_best = torch.min(candidate_surprisals).item()
+
 					if batch_best < best_surprisal:
 						best_surprisal = batch_best
 						best_suffix = suffix_batch[torch.argmin(candidate_surprisals).item()]
@@ -207,22 +230,18 @@ class RandomGreedyAttack(BaseAdvAttack):
 					del candidate_surprisals
 					suffix_batch = []
 					input_batch = []
-				
-				del candidate_input
 									
 			self.suffix = best_suffix
 
-			# if iter % params["log_freq"] == 0:
-			# 	print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
+			if iter % params["log_freq"] == 0:
+				print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
 
-			# 	if params["eval_log"]:
-			# 		print("Suffix: ", self.tokenizer.decode(best_suffix))
+				if params["eval_log"]:
+					print("Suffix: ", self.tokenizer.decode(best_suffix))
 
-			# 		if params["verbose"]:
-			# 			print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+					if params["verbose"]:
+						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 			
-			del candidates, best_suffix, best_surprisal, curr_input
-
 		return self.suffix
 		
 class CausalGreedyAttack(BaseAdvAttack):
