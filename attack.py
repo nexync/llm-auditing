@@ -214,7 +214,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 		clock_speeds = []
 		temps = []
 		
-		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1, disable=True):	
+		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
 			suffix_indices = self.get_suffix_indices()
 			target_indices = self.indices_dict["target"] + self.suffix.shape[0]
 
