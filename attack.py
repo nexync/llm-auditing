@@ -188,10 +188,10 @@ class RandomGreedyAttack(BaseAdvAttack):
 				params["K"]
 			)
 			
-			best_surprisal = self.get_target_surprisal(
+			best_surprisal = self.get_target_surprisal_unbatched(
 				curr_input.unsqueeze(0),
 				self.indices_dict["target"] + self.suffix.shape[0] - 1,
-			)[0]
+			)
 			best_suffix = self.suffix
 
 			input_batch = []
@@ -207,6 +207,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 				suffix_batch.append(candidate_suffix)
 				input_batch.append(candidate_input)
 
+				# Calculate candidate suffixes
 				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
 					if params["batch_size"] == 1:
 						candidate_surprisals = self.get_target_suprisal_unbatched(
@@ -233,13 +234,14 @@ class RandomGreedyAttack(BaseAdvAttack):
 									
 			self.suffix = best_suffix
 
+			# Logging
 			if iter % params["log_freq"] == 0:
-				print("iter ", iter, " || ", "PPL: ", best_surprisal.item())
+				print("iter ", iter, "/", params["T"], " || ", "PPL: ", best_surprisal.item())
 
-				if params["eval_log"]:
+				if params["verbose"]:
 					print("Suffix: ", self.tokenizer.decode(best_suffix))
 
-					if params["verbose"]:
+					if params["eval_log"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 			
 		return self.suffix
@@ -251,12 +253,18 @@ class CausalGreedyAttack(BaseAdvAttack):
 	def run(self, **params):
 		'''
 			params:
-				- T[int]: number of iterations attack is run
-				- B[int]: number of substitutions attempted per iteration
+				- T[int]: max sequence length of suffix
+				- B[int]: number of substitutions attempted per beam
 				- K[int]: number of candidates per gradient index
+				- M[int]: size of beam
 				- log_freq[int]: how often to log intermediate steps
 				- eval_log[bool]: whether to run prompt eval during logging
 		'''
-		defaults = {"log_freq": 10, "eval_log": False}
+		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
 		params = {**defaults, **params}
-		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
+		assert min([key in params for key in ["T", "B", "K", "M"]]), "Missing arguments in attack"
+
+		#initialize beam
+		beam = [self.suffix]
+
+		

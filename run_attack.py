@@ -48,8 +48,8 @@ def attack(attack, args):
 		"K": args.k,
 		"batch_size": 64,
 		"log_freq": 50,
-		"eval_log": True,
-		"verbose": False,
+		"eval_log": False,
+		"verbose": args.verbose,
 	}
 	return attack.run(**params)
 
