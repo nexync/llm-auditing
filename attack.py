@@ -289,7 +289,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 			print("Iteration finished in ", end - start, "seconds")
 
 			t = 0
-			delay = 0.
+			delay = 1.5
 			print_gpu_info()
 
 			while True:
