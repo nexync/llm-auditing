@@ -38,6 +38,8 @@ def get_gpu_clock_speed(index = None):
 		print("Error: NVIDIA's nvidia-smi tool is not available.")
 		return None
 
+def get_thermal_slowdown():
+
 
 
 class BaseAdvAttack():
@@ -206,6 +208,15 @@ class RandomGreedyAttack(BaseAdvAttack):
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 		
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
+		
+			temperature = get_gpu_temperature()
+			clock_speed = get_gpu_clock_speed()
+			
+			print("GPU temperatures:", temperature, "degrees Celsius")
+			print("GPU clock_speeds:", clock_speed)
+
+			start = time.perf_counter()
+
 			suffix_indices = self.get_suffix_indices()
 			target_indices = self.indices_dict["target"] + self.suffix.shape[0]
 
@@ -273,6 +284,9 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 					if params["eval_log"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+			end = time.perf_counter()
+
+			#time.sleep(max(0, 4.0 - (end - start)))
 			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
 		return self.suffix
