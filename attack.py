@@ -243,13 +243,13 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 				# Logging
 				if iter % params["log_freq"] == 0:
-				print("iter ", iter, "/", params["T"], " || ", "PPL: ", best_surprisal.item())
+					print("iter ", iter, "/", params["T"], " || ", "PPL: ", best_surprisal.item())
 
-				if params["verbose"]:
-					print("Suffix: ", self.tokenizer.decode(best_suffix))
+					if params["verbose"]:
+						print("Suffix: ", self.tokenizer.decode(best_suffix))
 
-					if params["eval_log"]:
-						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+						if params["eval_log"]:
+							print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 			
 		return self.suffix
 		
