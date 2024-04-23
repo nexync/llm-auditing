@@ -208,6 +208,10 @@ class RandomGreedyAttack(BaseAdvAttack):
 		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
+
+		TOTAL_IT_TIME = 0
+		COUNT_TIME = False
+		COUNT_ITERS = 0
 		
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1, disable=True):	
 			start = time.perf_counter()
@@ -285,20 +289,31 @@ class RandomGreedyAttack(BaseAdvAttack):
 			print("Iteration finished in ", end - start, "seconds")
 
 			t = 0
+			delay = 0.
 			print_gpu_info()
 
 			while True:
 				throttle = get_gpu_info("throttle")
 				if "Active" in throttle:
+					COUNT_TIME = True
 					time.sleep(0.1)
 					t += 0.1
 				else:
-					time.sleep(1)
+					time.sleep(delay)
+					t += delay
 					break
 
-			print("Sleep time", t, "seconds")
 			if t != 0:
+				print("Sleep time", t, "seconds")
 				print_gpu_info()
+
+			if COUNT_TIME:
+				COUNT_ITERS += 1
+				TOTAL_IT_TIME += (end - start) + t
+
+				if COUNT_ITERS == 20:
+					print(TOTAL_IT_TIME)
+					return None
 
 			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
