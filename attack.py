@@ -180,65 +180,69 @@ class RandomGreedyAttack(BaseAdvAttack):
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 		
-		with 
-		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
-			print(psutil.virtual_memory().percent)
-			curr_input = self.get_input()
-			candidates = self.top_candidates(
-				curr_input, 
-				self.get_suffix_indices(),
-				self.indices_dict["target"] + self.suffix.shape[0],
-				params["K"]
-			)
-			
-			best_surprisal = self.get_target_surprisal_unbatched(
-				curr_input.unsqueeze(0),
-				self.indices_dict["target"] + self.suffix.shape[0] - 1,
-			)
-			best_suffix = self.suffix
+		with tqdm(total=100, desc='cpu%', position=1) as cpubar, tqdm(total=100, desc='ram%', position=0) as rambar: 
+			rambar.n=psutil.virtual_memory().percent
+			cpubar.n=psutil.cpu_percent()
+			rambar.refresh()
+			cpubar.refresh()
+			for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1, disable=True):
+				print(psutil.virtual_memory().percent)
+				curr_input = self.get_input()
+				candidates = self.top_candidates(
+					curr_input, 
+					self.get_suffix_indices(),
+					self.indices_dict["target"] + self.suffix.shape[0],
+					params["K"]
+				)
+				
+				best_surprisal = self.get_target_surprisal_unbatched(
+					curr_input.unsqueeze(0),
+					self.indices_dict["target"] + self.suffix.shape[0] - 1,
+				)
+				best_suffix = self.suffix
 
-			input_batch = []
-			suffix_batch = []
+				input_batch = []
+				suffix_batch = []
 
-			for index in range(params["B"]):
-				r_index = random.randint(0, self.suffix.shape[0]-1)
-				r_token = candidates[r_index][random.randint(0, params["K"]-1)]
+				for index in range(params["B"]):
+					r_index = random.randint(0, self.suffix.shape[0]-1)
+					r_token = candidates[r_index][random.randint(0, params["K"]-1)]
 
-				candidate_suffix = self.update_suffix(r_token, r_index)
-				candidate_input = self.get_input(alternate_suffix=candidate_suffix)
+					candidate_suffix = self.update_suffix(r_token, r_index)
+					candidate_input = self.get_input(alternate_suffix=candidate_suffix)
 
-				suffix_batch.append(candidate_suffix)
-				input_batch.append(candidate_input)
+					suffix_batch.append(candidate_suffix)
+					input_batch.append(candidate_input)
 
-				# Calculate candidate suffixes
-				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
-					if params["batch_size"] == 1:
-						candidate_surprisals = self.get_target_surprisal_unbatched(
-							input_batch[0].unsqueeze(0),
-							self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
-						)
-						batch_best = candidate_surprisals
+					# Calculate candidate suffixes
+					if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+						if params["batch_size"] == 1:
+							candidate_surprisals = self.get_target_surprisal_unbatched(
+								input_batch[0].unsqueeze(0),
+								self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+							)
+							batch_best = candidate_surprisals
 
-					else:
-						candidate_surprisals = self.get_target_surprisal(
-							torch.stack(input_batch, dim = 0),
-							self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
-						) # B
+						else:
+							candidate_surprisals = self.get_target_surprisal(
+								torch.stack(input_batch, dim = 0),
+								self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+							) # B
 
-						batch_best = torch.min(candidate_surprisals)
+							batch_best = torch.min(candidate_surprisals)
 
-					if batch_best < best_surprisal:
-						best_surprisal = batch_best
-						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
+						if batch_best < best_surprisal:
+							best_surprisal = batch_best
+							best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
 
-					del candidate_surprisals
-					suffix_batch = []
-					input_batch = []
-									
-			self.suffix = best_suffix
+						del candidate_surprisals
+						suffix_batch = []
+						input_batch = []
+										
+				self.suffix = best_suffix
 
-			# Logging
-			if iter % params["log_freq"] == 0:
+				# Logging
+				if iter % params["log_freq"] == 0:
 				print("iter ", iter, "/", params["T"], " || ", "PPL: ", best_surprisal.item())
 
 				if params["verbose"]:
