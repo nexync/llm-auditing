@@ -305,7 +305,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 			if t != 0:
 				print("Sleep time", t, "seconds")
-			print_gpu_info()
 
 			if COUNT_TIME:
 				COUNT_ITERS += 1
