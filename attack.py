@@ -9,6 +9,7 @@ import time
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from torch.profiler import profile, record_function, ProfilerActivity
+import psutil
 
 from utils import token_gradients
 
@@ -86,7 +87,7 @@ class BaseAdvAttack():
 	def get_suffix_indices(self):
 		return torch.tensor(range(self.suffix_start, self.suffix_start + self.suffix.shape[0]), device = self.model.device)
 	
-	def get_target_suprisal_unbatched(self, input, target_indices, reduction = "sum"):
+	def get_target_surprisal_unbatched(self, input, target_indices, reduction = "sum"):
 		with torch.no_grad():
 			logprobs = (1 / np.log(2.)) * F.log_softmax(self.model(input).logits, dim = 2)[0] # B x L x V
 			logprobs = logprobs[target_indices] # B x S x V
@@ -178,8 +179,10 @@ class RandomGreedyAttack(BaseAdvAttack):
 		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
-
+		
+		with 
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
+			print(psutil.virtual_memory().percent)
 			curr_input = self.get_input()
 			candidates = self.top_candidates(
 				curr_input, 
@@ -210,7 +213,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 				# Calculate candidate suffixes
 				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
 					if params["batch_size"] == 1:
-						candidate_surprisals = self.get_target_suprisal_unbatched(
+						candidate_surprisals = self.get_target_surprisal_unbatched(
 							input_batch[0].unsqueeze(0),
 							self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
 						)
