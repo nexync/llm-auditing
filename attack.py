@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import random
 import tqdm
 import time 
+import json
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -209,13 +210,11 @@ class RandomGreedyAttack(BaseAdvAttack):
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
-		TOTAL_IT_TIME = 0
-		COUNT_TIME = False
-		COUNT_ITERS = 0
+		times = []
+		clock_speeds = []
+		temps = []
 		
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1, disable=True):	
-			start = time.perf_counter()
-
 			suffix_indices = self.get_suffix_indices()
 			target_indices = self.indices_dict["target"] + self.suffix.shape[0]
 
@@ -249,6 +248,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 				# Calculate candidate suffixes
 				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+					start = time.perf_counter()
+
 					if params["batch_size"] == 1:
 						candidate_surprisals = self.get_target_surprisal_unbatched(
 							input_batch[0].unsqueeze(0),
@@ -264,6 +265,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 						batch_best = torch.min(candidate_surprisals)
 
+					end = time.perf_counter()
+
 					if batch_best < best_surprisal:
 						best_surprisal = batch_best
 						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
@@ -271,7 +274,9 @@ class RandomGreedyAttack(BaseAdvAttack):
 					del candidate_surprisals
 					suffix_batch = []
 					input_batch = []
-									
+
+					times.append(end-start)
+
 			self.suffix = best_suffix
 
 			# Logging
@@ -283,36 +288,21 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 			# 		if params["eval_log"]:
 			# 			print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
-			end = time.perf_counter()
+			
 			
 			# Hardware logging:
-			print("Iteration finished in ", end - start, "seconds")
+			temps.append(get_gpu_info("temperature", index = 1))
+			clock_speeds.append(get_gpu_info("clock_speed", index = 1))
 
-			t = 0
-			delay = 1.5
-			print_gpu_info()
-
-			while True:
-				throttle = get_gpu_info("throttle")
-				if "Active" in throttle:
-					COUNT_TIME = True
-					time.sleep(0.1)
-					t += 0.1
-				else:
-					time.sleep(delay)
-					t += delay
-					break
-
-			if t != 0:
-				print("Sleep time", t, "seconds")
-
-			if COUNT_TIME:
-				COUNT_ITERS += 1
-				TOTAL_IT_TIME += (end - start) + t
-
-				if COUNT_ITERS == 50:
-					print(TOTAL_IT_TIME)
-					return None
+			if iter == 100:
+				d = {
+					"temps": temps,
+					"clock_speeds": clock_speeds,
+					"times": times,
+				}
+				with open("data.json", "w") as f:
+					json.dump(d, f)
+				break
 
 			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
