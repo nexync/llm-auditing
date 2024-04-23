@@ -17,30 +17,25 @@ random.seed(42)
 
 import subprocess
 
-def get_gpu_temperature():
-    try:
-        output = subprocess.check_output(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"])
-        temperature = output.decode("utf-8").strip().split("\n")
-        return temperature
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("Error: NVIDIA's nvidia-smi tool is not available.")
-        return None
+def get_gpu_info(query, index = None):
+	lookup = {
+		"clock_speed": "clocks.current.graphics",
+		"temperature": "temperature.gpu",
+		"throttle": "clocks_throttle_reasons.sw_thermal_slowdown"
+	}
 
-def get_gpu_clock_speed(index = None):
+	assert query in lookup, "Desired query not found"
+
 	try:
-		output = subprocess.check_output(["nvidia-smi", "--query-gpu=clocks.current.graphics", "--format=csv,noheader,nounits"])
-		clock_speed = output.decode("utf-8").strip().split("\n")
+		output = subprocess.check_output(["nvidia-smi", "--query-gpu={}".format(lookup[query]), "--format=csv,noheader,nounits"])
+		output = output.decode("utf-8").strip().split("\n")
 		if index is None:
-			return clock_speed
+			return output
 		else:
-			return clock_speed[index]
+			return output[index]
 	except (subprocess.CalledProcessError, FileNotFoundError):
 		print("Error: NVIDIA's nvidia-smi tool is not available.")
 		return None
-
-def get_thermal_slowdown():
-
-
 
 class BaseAdvAttack():
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, max_suffix_length = 64, instruction = ""):
@@ -207,13 +202,14 @@ class RandomGreedyAttack(BaseAdvAttack):
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 		
-		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
+		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1, disable=True):	
 		
-			temperature = get_gpu_temperature()
-			clock_speed = get_gpu_clock_speed()
+			temperature = get_gpu_info("temperature")
+			clock_speed = get_gpu_info("clock_speed")
 			
-			print("GPU temperatures:", temperature, "degrees Celsius")
-			print("GPU clock_speeds:", clock_speed)
+			if iter % 5 == 0:
+				print("GPU temperatures:", temperature, "degrees Celsius")
+				print("GPU clock_speeds:", clock_speed, "MHz")
 
 			start = time.perf_counter()
 
@@ -285,8 +281,21 @@ class RandomGreedyAttack(BaseAdvAttack):
 					if params["eval_log"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 			end = time.perf_counter()
+			
+			# Hardware logging:
+			print("Iteration finished in ", end - start, "seconds")
 
-			#time.sleep(max(0, 4.0 - (end - start)))
+			throttle = get_gpu_info("throttle")
+			t = 0
+			while True:
+				if "Active" in throttle:
+					time.sleep(0.1)
+					t += 0.1
+				else:
+					break
+
+			print("Sleep time", t, "seconds")
+
 			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
 		return self.suffix
