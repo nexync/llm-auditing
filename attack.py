@@ -203,14 +203,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 		
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1, disable=True):	
-		
-			temperature = get_gpu_info("temperature")
-			clock_speed = get_gpu_info("clock_speed")
-			
-			if iter % 5 == 0:
-				print("GPU temperatures:", temperature, "degrees Celsius")
-				print("GPU clock_speeds:", clock_speed, "MHz")
-
 			start = time.perf_counter()
 
 			suffix_indices = self.get_suffix_indices()
@@ -288,6 +280,11 @@ class RandomGreedyAttack(BaseAdvAttack):
 			t = 0
 			while True:
 				throttle = get_gpu_info("throttle")
+				temperature = get_gpu_info("temperature")
+				clock_speed = get_gpu_info("clock_speed")
+			
+				print("GPU temperatures:", temperature, "degrees Celsius")
+				print("GPU clock_speeds:", clock_speed, "MHz")
 
 				if "Active" in throttle:
 					time.sleep(0.1)
