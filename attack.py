@@ -15,6 +15,33 @@ from utils import token_gradients
 
 random.seed(42)
 
+import subprocess
+
+def get_gpu_temperature():
+    try:
+        output = subprocess.check_output(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"])
+        temperature = output.decode("utf-8").strip().split("\n")
+        return temperature
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("Error: NVIDIA's nvidia-smi tool is not available.")
+        return None
+
+def get_gpu_clock_speed(index = None):
+	try:
+		output = subprocess.check_output(["nvidia-smi", "--query-gpu=clocks.current.graphics", "--format=csv,noheader,nounits"])
+		clock_speed = output.decode("utf-8").strip().split("\n")
+		if index is None:
+			return clock_speed
+		else:
+			return clock_speed[index]
+	except (subprocess.CalledProcessError, FileNotFoundError):
+		print("Error: NVIDIA's nvidia-smi tool is not available.")
+		return None
+
+def get_thermal_slowdown():
+
+
+
 class BaseAdvAttack():
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, max_suffix_length = 64, instruction = ""):
 		'''
@@ -180,24 +207,37 @@ class RandomGreedyAttack(BaseAdvAttack):
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 		
-		with tqdm(total=100, desc='cpu%', position=1) as cpubar, tqdm(total=100, desc='ram%', position=0) as rambar: 
-			rambar.n=psutil.virtual_memory().percent
-			cpubar.n=psutil.cpu_percent()
-			rambar.refresh()
-			cpubar.refresh()
-			for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1, disable=True):
-				print(psutil.virtual_memory().percent)
+		with tqdm.tqdm(total=100, desc='cpu%', position=1) as cpubar, tqdm.tqdm(total=100, desc='ram%', position=0) as rambar: 
+			for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
+			
+				temperature = get_gpu_temperature()
+				clock_speed = get_gpu_clock_speed()
+				
+				print("GPU temperatures:", temperature, "degrees Celsius")
+				print("GPU clock_speeds:", clock_speed)
+	
+			#with profile(record_shapes=True, use_cuda=True) as prof:
+				#rambar.n=psutil.virtual_memory().percent
+				#cpubar.n=psutil.cpu_percent()
+				#rambar.refresh()
+				#cpubar.refresh()
+				start = time.perf_counter()
+
+				suffix_indices = self.get_suffix_indices()
+				target_indices = self.indices_dict["target"] + self.suffix.shape[0]
+
+
 				curr_input = self.get_input()
 				candidates = self.top_candidates(
 					curr_input, 
-					self.get_suffix_indices(),
-					self.indices_dict["target"] + self.suffix.shape[0],
+					suffix_indices,
+					target_indices,
 					params["K"]
 				)
 				
 				best_surprisal = self.get_target_surprisal_unbatched(
 					curr_input.unsqueeze(0),
-					self.indices_dict["target"] + self.suffix.shape[0] - 1,
+					target_indices-1,
 				)
 				best_suffix = self.suffix
 
@@ -219,14 +259,14 @@ class RandomGreedyAttack(BaseAdvAttack):
 						if params["batch_size"] == 1:
 							candidate_surprisals = self.get_target_surprisal_unbatched(
 								input_batch[0].unsqueeze(0),
-								self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+								target_indices-1,
 							)
 							batch_best = candidate_surprisals
 
 						else:
 							candidate_surprisals = self.get_target_surprisal(
 								torch.stack(input_batch, dim = 0),
-								self.indices_dict["target"] + candidate_suffix.shape[0] - 1,
+								target_indices-1,
 							) # B
 
 							batch_best = torch.min(candidate_surprisals)
@@ -250,7 +290,12 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 						if params["eval_log"]:
 							print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
-			
+				end = time.perf_counter()
+
+				#time.sleep(max(0, 4.0 - (end - start)))
+				del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
+
+			#print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=5))
 		return self.suffix
 		
 class CausalDPAttack(BaseAdvAttack):
