@@ -17,6 +17,13 @@ random.seed(42)
 
 import subprocess
 
+def print_gpu_info():
+	temperature = get_gpu_info("temperature")
+	clock_speed = get_gpu_info("clock_speed")
+
+	print("GPU temperatures:", temperature, "degrees Celsius")
+	print("GPU clock_speeds:", clock_speed, "MHz")
+
 def get_gpu_info(query, index = None):
 	lookup = {
 		"clock_speed": "clocks.current.graphics",
@@ -278,21 +285,20 @@ class RandomGreedyAttack(BaseAdvAttack):
 			print("Iteration finished in ", end - start, "seconds")
 
 			t = 0
+			print_gpu_info()
+
 			while True:
 				throttle = get_gpu_info("throttle")
-				temperature = get_gpu_info("temperature")
-				clock_speed = get_gpu_info("clock_speed")
-			
-				print("GPU temperatures:", temperature, "degrees Celsius")
-				print("GPU clock_speeds:", clock_speed, "MHz")
-
 				if "Active" in throttle:
 					time.sleep(0.1)
 					t += 0.1
 				else:
+					time.sleep(1)
 					break
 
 			print("Sleep time", t, "seconds")
+			if t != 0:
+				print_gpu_info()
 
 			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
