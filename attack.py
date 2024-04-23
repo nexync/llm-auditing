@@ -246,7 +246,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 			
 		return self.suffix
 		
-class CausalGreedyAttack(BaseAdvAttack):
+class CausalDPAttack(BaseAdvAttack):
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, max_suffix_length=64, instruction=""):
 		super().__init__(model, tokenizer, query, target, max_suffix_length, instruction)
 
@@ -267,4 +267,3 @@ class CausalGreedyAttack(BaseAdvAttack):
 		#initialize beam
 		beam = [self.suffix]
 
-		
