@@ -38,8 +38,6 @@ def get_gpu_clock_speed(index = None):
 		print("Error: NVIDIA's nvidia-smi tool is not available.")
 		return None
 
-def get_thermal_slowdown():
-
 
 
 class BaseAdvAttack():
@@ -207,95 +205,76 @@ class RandomGreedyAttack(BaseAdvAttack):
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 		
-		with tqdm.tqdm(total=100, desc='cpu%', position=1) as cpubar, tqdm.tqdm(total=100, desc='ram%', position=0) as rambar: 
-			for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
+		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
+			suffix_indices = self.get_suffix_indices()
+			target_indices = self.indices_dict["target"] + self.suffix.shape[0]
+
+
+			curr_input = self.get_input()
+			candidates = self.top_candidates(
+				curr_input, 
+				suffix_indices,
+				target_indices,
+				params["K"]
+			)
 			
-				temperature = get_gpu_temperature()
-				clock_speed = get_gpu_clock_speed()
-				
-				print("GPU temperatures:", temperature, "degrees Celsius")
-				print("GPU clock_speeds:", clock_speed)
-	
-			#with profile(record_shapes=True, use_cuda=True) as prof:
-				#rambar.n=psutil.virtual_memory().percent
-				#cpubar.n=psutil.cpu_percent()
-				#rambar.refresh()
-				#cpubar.refresh()
-				start = time.perf_counter()
+			best_surprisal = self.get_target_surprisal_unbatched(
+				curr_input.unsqueeze(0),
+				target_indices-1,
+			)
+			best_suffix = self.suffix
 
-				suffix_indices = self.get_suffix_indices()
-				target_indices = self.indices_dict["target"] + self.suffix.shape[0]
+			input_batch = []
+			suffix_batch = []
 
+			for index in range(params["B"]):
+				r_index = random.randint(0, self.suffix.shape[0]-1)
+				r_token = candidates[r_index][random.randint(0, params["K"]-1)]
 
-				curr_input = self.get_input()
-				candidates = self.top_candidates(
-					curr_input, 
-					suffix_indices,
-					target_indices,
-					params["K"]
-				)
-				
-				best_surprisal = self.get_target_surprisal_unbatched(
-					curr_input.unsqueeze(0),
-					target_indices-1,
-				)
-				best_suffix = self.suffix
+				candidate_suffix = self.update_suffix(r_token, r_index)
+				candidate_input = self.get_input(alternate_suffix=candidate_suffix)
 
-				input_batch = []
-				suffix_batch = []
+				suffix_batch.append(candidate_suffix)
+				input_batch.append(candidate_input)
 
-				for index in range(params["B"]):
-					r_index = random.randint(0, self.suffix.shape[0]-1)
-					r_token = candidates[r_index][random.randint(0, params["K"]-1)]
+				# Calculate candidate suffixes
+				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+					if params["batch_size"] == 1:
+						candidate_surprisals = self.get_target_surprisal_unbatched(
+							input_batch[0].unsqueeze(0),
+							target_indices-1,
+						)
+						batch_best = candidate_surprisals
 
-					candidate_suffix = self.update_suffix(r_token, r_index)
-					candidate_input = self.get_input(alternate_suffix=candidate_suffix)
+					else:
+						candidate_surprisals = self.get_target_surprisal(
+							torch.stack(input_batch, dim = 0),
+							target_indices-1,
+						) # B
 
-					suffix_batch.append(candidate_suffix)
-					input_batch.append(candidate_input)
+						batch_best = torch.min(candidate_surprisals)
 
-					# Calculate candidate suffixes
-					if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
-						if params["batch_size"] == 1:
-							candidate_surprisals = self.get_target_surprisal_unbatched(
-								input_batch[0].unsqueeze(0),
-								target_indices-1,
-							)
-							batch_best = candidate_surprisals
+					if batch_best < best_surprisal:
+						best_surprisal = batch_best
+						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
 
-						else:
-							candidate_surprisals = self.get_target_surprisal(
-								torch.stack(input_batch, dim = 0),
-								target_indices-1,
-							) # B
+					del candidate_surprisals
+					suffix_batch = []
+					input_batch = []
+									
+			self.suffix = best_suffix
 
-							batch_best = torch.min(candidate_surprisals)
+			# Logging
+			if iter % params["log_freq"] == 0:
+				print("iter ", iter, "/", params["T"], " || ", "PPL: ", best_surprisal.item())
 
-						if batch_best < best_surprisal:
-							best_surprisal = batch_best
-							best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
+				if params["verbose"]:
+					print("Suffix: ", self.tokenizer.decode(best_suffix))
 
-						del candidate_surprisals
-						suffix_batch = []
-						input_batch = []
-										
-				self.suffix = best_suffix
+					if params["eval_log"]:
+						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
+			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
-				# Logging
-				if iter % params["log_freq"] == 0:
-					print("iter ", iter, "/", params["T"], " || ", "PPL: ", best_surprisal.item())
-
-					if params["verbose"]:
-						print("Suffix: ", self.tokenizer.decode(best_suffix))
-
-						if params["eval_log"]:
-							print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
-				end = time.perf_counter()
-
-				#time.sleep(max(0, 4.0 - (end - start)))
-				del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
-
-			#print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=5))
 		return self.suffix
 		
 class CausalDPAttack(BaseAdvAttack):
