@@ -285,9 +285,10 @@ class RandomGreedyAttack(BaseAdvAttack):
 			# Hardware logging:
 			print("Iteration finished in ", end - start, "seconds")
 
-			throttle = get_gpu_info("throttle")
 			t = 0
 			while True:
+				throttle = get_gpu_info("throttle")
+
 				if "Active" in throttle:
 					time.sleep(0.1)
 					t += 0.1
