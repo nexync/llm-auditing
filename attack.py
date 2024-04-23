@@ -292,31 +292,26 @@ class RandomGreedyAttack(BaseAdvAttack):
 			delay = 0.
 			print_gpu_info()
 
-			throttle = get_gpu_info("throttle")
-			if "Active" in throttle:
-				COUNT_TIME = True
-				print(throttle)
+			while True:
+				throttle = get_gpu_info("throttle")
+				if "Active" in throttle:
+					COUNT_TIME = True
+					time.sleep(0.1)
+					t += 0.1
+				else:
+					time.sleep(delay)
+					t += delay
+					break
 
-			# while True:
-			# 	throttle = get_gpu_info("throttle")
-			# 	if "Active" in throttle:
-			# 		COUNT_TIME = True
-			# 		time.sleep(0.1)
-			# 		t += 0.1
-			# 	else:
-			# 		time.sleep(delay)
-			# 		t += delay
-			# 		break
-
-			# if t != 0:
-			# 	print("Sleep time", t, "seconds")
+			if t != 0:
+				print("Sleep time", t, "seconds")
 			print_gpu_info()
 
 			if COUNT_TIME:
 				COUNT_ITERS += 1
 				TOTAL_IT_TIME += (end - start) + t
 
-				if COUNT_ITERS == 20:
+				if COUNT_ITERS == 50:
 					print(TOTAL_IT_TIME)
 					return None
 
