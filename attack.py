@@ -181,6 +181,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
 		self.model.eval()
+		print("Using batch size {}".format(params["batch_size"]))
 		
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
 			suffix_indices = self.get_suffix_indices()
@@ -200,8 +201,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 			input_batch = []
 			suffix_batch = []
 
-			tries = []
-
 			for index in range(params["B"]):
 				# There IS nondeterminism despite setting same seeds due to quantization and top-k gradient sorting
 				r_index = random.randint(0, self.suffix.shape[0]-1)
@@ -212,13 +211,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 				suffix_batch.append(candidate_suffix)
 				input_batch.append(candidate_input)
-
-				tries.append(
-					self.get_target_surprisal_unbatched(
-						candidate_input.unsqueeze(0),
-						target_indices-1
-					).item()
-				)
 
 				# Calculate candidate suffixes
 				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
@@ -235,20 +227,22 @@ class RandomGreedyAttack(BaseAdvAttack):
 					suffix_batch = []
 					input_batch = []
 
+			if params["batch_size"] > 1:
+				replace_surprisal = self.get_target_surprisal_unbatched(
+					self.get_input(best_suffix).unsqueeze(0),
+					target_indices-1
+				)
+			else:
+				replace_surprisal = best_surprisal
+
 			curr_surprisal = self.get_target_surprisal_unbatched(
 				curr_input.unsqueeze(0),
 				target_indices-1,
 			)
-			replace_surprisal = self.get_target_surprisal_unbatched(
-				self.get_input(best_suffix).unsqueeze(0),
-				target_indices-1
-			)
+			
+			# Batched loss calculations are not the same as unbatched calculations bc of layernorm etc.
 			if replace_surprisal < curr_surprisal:
 				self.suffix = best_suffix
-			
-			print(sorted(tries))
-			print(replace_surprisal.item())
-			break
 
 			# Logging
 			if iter % params["log_freq"] == 0:
