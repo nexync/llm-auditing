@@ -11,4 +11,4 @@ Unlearned Model: https://huggingface.co/microsoft/Llama2-7b-WhoIsHarryPotter
 
 ## Running Adversarial Attacks
 
-`python run_attack.py --model_path {{path/to/model}} --config_path {{path/to/repo}}/configs/attack_config.json -v
+`python run_attack.py --model_path {{path/to/model}} --config_path {{path/to/repo}}/configs/attack_config.json -v`
