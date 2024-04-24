@@ -180,15 +180,10 @@ class RandomGreedyAttack(BaseAdvAttack):
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 		
-		best_surprisal = self.get_target_surprisal_unbatched(
-			curr_input.unsqueeze(0),
-			target_indices-1,
-		)
-		best_suffix = self.suffix
-
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
 			suffix_indices = self.get_suffix_indices()
 			target_indices = self.indices_dict["target"] + self.suffix.shape[0]
+
 
 			curr_input = self.get_input()
 			candidates = self.top_candidates(
@@ -197,7 +192,20 @@ class RandomGreedyAttack(BaseAdvAttack):
 				target_indices,
 				params["K"]
 			)
-		
+			
+			best_surprisal = self.get_target_surprisal_unbatched(
+				curr_input.unsqueeze(0),
+				target_indices-1,
+			)
+			best_surprisal2 = self.get_target_surprisal(
+				curr_input.unsqueeze(0),
+				target_indices-1,
+			)[0]
+			best_suffix = self.suffix
+
+			print("Unbatched: {}".format(best_surprisal))
+			print("Batched: {}".format(best_surprisal2))
+
 			input_batch = []
 			suffix_batch = []
 
