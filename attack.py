@@ -186,7 +186,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 			suffix_indices = self.get_suffix_indices()
 			target_indices = self.indices_dict["target"] + self.suffix.shape[0]
 
-
 			curr_input = self.get_input()
 			candidates = self.top_candidates(
 				curr_input, 
@@ -195,11 +194,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 				params["K"]
 			)
 			
-			best_surprisal = self.get_target_surprisal_unbatched(
-				curr_input.unsqueeze(0),
-				target_indices-1,
-			)
-			best_suffix = self.suffix
+			best_surprisal = None
+			best_suffix = None
 
 			input_batch = []
 			suffix_batch = []
@@ -223,18 +219,25 @@ class RandomGreedyAttack(BaseAdvAttack):
 					) # B
 
 					batch_best = torch.min(candidate_surprisals)
-
-					print(batch_best, best_surprisal)
-					if batch_best < best_surprisal:
+					if best_surprisal is None or batch_best < best_surprisal:
 						best_surprisal = batch_best
 						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
 
-					print(self.get_target_surprisal(self.get_input(best_suffix).unsqueeze(0), target_indices-1))
-
 					suffix_batch = []
 					input_batch = []
-									
-			self.suffix = best_suffix
+
+			curr_surprisal = self.get_target_surprisal_unbatched(
+				curr_input.unsqueeze(0),
+				target_indices-1,
+			)
+			replace_surprisal = self.get_target_surprisal_unbatched(
+				self.get_input(best_suffix).unsqueeze(0),
+				target_indices-1
+			)
+			if replace_surprisal < curr_surprisal:
+				self.suffix = best_suffix
+			
+			print(min(replace_surprisal, curr_surprisal).item())
 
 			# Logging
 			if iter % params["log_freq"] == 0:
