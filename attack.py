@@ -200,9 +200,13 @@ class RandomGreedyAttack(BaseAdvAttack):
 			input_batch = []
 			suffix_batch = []
 
+			tries = []
+
 			for index in range(params["B"]):
 				r_index = random.randint(0, self.suffix.shape[0]-1)
 				r_token = candidates[r_index][random.randint(0, params["K"]-1)]
+
+				tries.append((r_index, r_token))
 
 				candidate_suffix = self.update_suffix(r_token, r_index)
 				candidate_input = self.get_input(alternate_suffix=candidate_suffix)
@@ -237,7 +241,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 			if replace_surprisal < curr_surprisal:
 				self.suffix = best_suffix
 			
-			print(min(replace_surprisal, curr_surprisal).item())
+			print(tries)
 
 			# Logging
 			if iter % params["log_freq"] == 0:
