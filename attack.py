@@ -199,14 +199,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 				curr_input.unsqueeze(0),
 				target_indices-1,
 			)
-			best_surprisal2 = self.get_target_surprisal(
-				curr_input.unsqueeze(0),
-				target_indices-1,
-			)[0]
 			best_suffix = self.suffix
-
-			print("Unbatched: {}".format(best_surprisal))
-			print("Batched: {}".format(best_surprisal2))
 
 			input_batch = []
 			suffix_batch = []
@@ -223,25 +216,20 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 				# Calculate candidate suffixes
 				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
-					if params["batch_size"] == 1:
-						candidate_surprisals = self.get_target_surprisal_unbatched(
-							input_batch[0].unsqueeze(0),
-							target_indices-1,
-						)
-						batch_best = candidate_surprisals
 
-					else:
-						candidate_surprisals = self.get_target_surprisal(
-							torch.stack(input_batch, dim = 0),
-							target_indices-1,
-						) # B
+					candidate_surprisals = self.get_target_surprisal(
+						torch.stack(input_batch, dim = 0),
+						target_indices-1,
+					) # B
 
-						batch_best = torch.min(candidate_surprisals)
+					batch_best = torch.min(candidate_surprisals)
 
 					print(batch_best, best_surprisal)
 					if batch_best < best_surprisal:
 						best_surprisal = batch_best
 						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
+
+					print(self.get_target_surprisal(self.get_input(best_suffix).unsqueeze(0), target_indices-1))
 
 					suffix_batch = []
 					input_batch = []
