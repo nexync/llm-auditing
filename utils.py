@@ -2,6 +2,27 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+def load_model(model_path, tokenizer_path = None):
+    model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype = torch.float16)
+    if tokenizer_path is not None:
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+    
+    if torch.cuda.is_available():
+        model.to("cuda:0")
+        
+    return model, tokenizer
+
+def prompt_model(model, tokenizer, s):
+    full_string = " ".join(["[INST]", "<<SYS>> Answer all questions succinctly. <</SYS>>", s, "[/INST]"])
+    iids = tokenizer(full_string, return_tensors="pt").to(model.device)
+
+    output = model.generate(**iids, max_new_tokens = 250)
+    return tokenizer.decode(output[0])
+
 def token_gradients(
     model,
     input_tokens,
@@ -35,7 +56,7 @@ def token_gradients(
 
     loss.backward()
     
-    return one_hot_vec.grad.clone()
+    return one_hot_vec.grad.detach().clone()
 
 def get_embedding_matrix(model):
     return model.model.embed_tokens.weight.detach().clone()
