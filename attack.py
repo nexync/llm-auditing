@@ -15,31 +15,6 @@ from utils import token_gradients
 
 random.seed(42)
 
-import subprocess
-
-def get_gpu_temperature():
-    try:
-        output = subprocess.check_output(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"])
-        temperature = output.decode("utf-8").strip().split("\n")
-        return temperature
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("Error: NVIDIA's nvidia-smi tool is not available.")
-        return None
-
-def get_gpu_clock_speed(index = None):
-	try:
-		output = subprocess.check_output(["nvidia-smi", "--query-gpu=clocks.current.graphics", "--format=csv,noheader,nounits"])
-		clock_speed = output.decode("utf-8").strip().split("\n")
-		if index is None:
-			return clock_speed
-		else:
-			return clock_speed[index]
-	except (subprocess.CalledProcessError, FileNotFoundError):
-		print("Error: NVIDIA's nvidia-smi tool is not available.")
-		return None
-
-
-
 class BaseAdvAttack():
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, max_suffix_length = 64, instruction = ""):
 		'''
@@ -204,11 +179,13 @@ class RandomGreedyAttack(BaseAdvAttack):
 		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
+
+		self.model.eval()
+		print("Using batch size {}".format(params["batch_size"]))
 		
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
 			suffix_indices = self.get_suffix_indices()
 			target_indices = self.indices_dict["target"] + self.suffix.shape[0]
-
 
 			curr_input = self.get_input()
 			candidates = self.top_candidates(
@@ -218,16 +195,14 @@ class RandomGreedyAttack(BaseAdvAttack):
 				params["K"]
 			)
 			
-			best_surprisal = self.get_target_surprisal_unbatched(
-				curr_input.unsqueeze(0),
-				target_indices-1,
-			)
-			best_suffix = self.suffix
+			best_surprisal = None
+			best_suffix = None
 
 			input_batch = []
 			suffix_batch = []
 
 			for index in range(params["B"]):
+				# There IS nondeterminism despite setting same seeds due to quantization and top-k gradient sorting
 				r_index = random.randint(0, self.suffix.shape[0]-1)
 				r_token = candidates[r_index][random.randint(0, params["K"]-1)]
 
@@ -239,30 +214,35 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 				# Calculate candidate suffixes
 				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
-					if params["batch_size"] == 1:
-						candidate_surprisals = self.get_target_surprisal_unbatched(
-							input_batch[0].unsqueeze(0),
-							target_indices-1,
-						)
-						batch_best = candidate_surprisals
+					candidate_surprisals = self.get_target_surprisal(
+						torch.stack(input_batch, dim = 0),
+						target_indices-1,
+					) # B
 
-					else:
-						candidate_surprisals = self.get_target_surprisal(
-							torch.stack(input_batch, dim = 0),
-							target_indices-1,
-						) # B
-
-						batch_best = torch.min(candidate_surprisals)
-
-					if batch_best < best_surprisal:
+					batch_best = torch.min(candidate_surprisals)
+					if best_surprisal is None or batch_best < best_surprisal:
 						best_surprisal = batch_best
 						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
 
-					del candidate_surprisals
 					suffix_batch = []
 					input_batch = []
-									
-			self.suffix = best_suffix
+
+			if params["batch_size"] > 1:
+				replace_surprisal = self.get_target_surprisal_unbatched(
+					self.get_input(best_suffix).unsqueeze(0),
+					target_indices-1
+				)
+			else:
+				replace_surprisal = best_surprisal
+
+			curr_surprisal = self.get_target_surprisal_unbatched(
+				curr_input.unsqueeze(0),
+				target_indices-1,
+			)
+			
+			# Batched loss calculations are not the same as unbatched calculations bc of layernorm etc.
+			if replace_surprisal < curr_surprisal:
+				self.suffix = best_suffix
 
 			# Logging
 			if iter % params["log_freq"] == 0:
@@ -273,7 +253,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 					if params["eval_log"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
-			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
 		return self.suffix
 		
