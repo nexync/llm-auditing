@@ -294,16 +294,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 			temps.append(get_gpu_info("temperature", index = 1))
 			clock_speeds.append(get_gpu_info("clock_speed", index = 1))
 
-			if iter == 100:
-				d = {
-					"temps": temps,
-					"clock_speeds": clock_speeds,
-					"times": times,
-				}
-				with open("data.json", "w") as f:
-					json.dump(d, f)
-				break
-
 			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
 		return self.suffix
