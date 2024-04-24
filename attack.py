@@ -15,31 +15,6 @@ from utils import token_gradients
 
 random.seed(42)
 
-import subprocess
-
-def get_gpu_temperature():
-    try:
-        output = subprocess.check_output(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"])
-        temperature = output.decode("utf-8").strip().split("\n")
-        return temperature
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("Error: NVIDIA's nvidia-smi tool is not available.")
-        return None
-
-def get_gpu_clock_speed(index = None):
-	try:
-		output = subprocess.check_output(["nvidia-smi", "--query-gpu=clocks.current.graphics", "--format=csv,noheader,nounits"])
-		clock_speed = output.decode("utf-8").strip().split("\n")
-		if index is None:
-			return clock_speed
-		else:
-			return clock_speed[index]
-	except (subprocess.CalledProcessError, FileNotFoundError):
-		print("Error: NVIDIA's nvidia-smi tool is not available.")
-		return None
-
-
-
 class BaseAdvAttack():
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, max_suffix_length = 64, instruction = ""):
 		'''
@@ -258,7 +233,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 						best_surprisal = batch_best
 						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
 
-					del candidate_surprisals
 					suffix_batch = []
 					input_batch = []
 									
@@ -273,7 +247,6 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 					if params["eval_log"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
-			del target_indices, suffix_indices, best_suffix, best_surprisal, candidates, curr_input
 
 		return self.suffix
 		
