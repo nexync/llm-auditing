@@ -1,8 +1,13 @@
 {
-	"b": 64,
-	"k": 64,
-	"t": 500,
-	"suffix_length": 64,
-	"prompt": "What position does Harry Potter play on his Quidditch team?",
-	"target": "Harry Potter is the Seeker on his Quidditch team."
+	"greedy": {
+		"b": 64,
+		"k": 64,
+		"t": 500,
+		"suffix_length": 64,
+		"prompt": "What position does Harry Potter play on his Quidditch team?",
+		"target": "Harry Potter is the Seeker on his Quidditch team."
+	},
+	"causal": {
+		
+	}
 }
