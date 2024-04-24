@@ -203,33 +203,37 @@ class RandomGreedyAttack(BaseAdvAttack):
 			tries = []
 
 			for index in range(params["B"]):
+				# There IS nondeterminism despite setting same seeds due to quantization and top-k gradient sorting
 				r_index = random.randint(0, self.suffix.shape[0]-1)
-				token_index = random.randint(0, params["K"]-1)
-				r_token = candidates[r_index][token_index]
+				r_token = candidates[r_index][random.randint(0, params["K"]-1)]
 
-				tries.append((r_index, token_index, r_token.item()))
+				candidate_suffix = self.update_suffix(r_token, r_index)
+				candidate_input = self.get_input(alternate_suffix=candidate_suffix)
 
-				# candidate_suffix = self.update_suffix(r_token, r_index)
-				# candidate_input = self.get_input(alternate_suffix=candidate_suffix)
+				suffix_batch.append(candidate_suffix)
+				input_batch.append(candidate_input)
 
-				# suffix_batch.append(candidate_suffix)
-				# input_batch.append(candidate_input)
+				tries.append(
+					self.get_target_surprisal_unbatched(
+						candidate_input.unsqueeze(0),
+						target_indices-1
+					).item()
+				)
 
-				# # Calculate candidate suffixes
-				# if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+				# Calculate candidate suffixes
+				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+					candidate_surprisals = self.get_target_surprisal(
+						torch.stack(input_batch, dim = 0),
+						target_indices-1,
+					) # B
 
-				# 	candidate_surprisals = self.get_target_surprisal(
-				# 		torch.stack(input_batch, dim = 0),
-				# 		target_indices-1,
-				# 	) # B
+					batch_best = torch.min(candidate_surprisals)
+					if best_surprisal is None or batch_best < best_surprisal:
+						best_surprisal = batch_best
+						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
 
-				# 	batch_best = torch.min(candidate_surprisals)
-				# 	if best_surprisal is None or batch_best < best_surprisal:
-				# 		best_surprisal = batch_best
-				# 		best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
-
-				# 	suffix_batch = []
-				# 	input_batch = []
+					suffix_batch = []
+					input_batch = []
 
 			curr_surprisal = self.get_target_surprisal_unbatched(
 				curr_input.unsqueeze(0),
@@ -242,7 +246,9 @@ class RandomGreedyAttack(BaseAdvAttack):
 			if replace_surprisal < curr_surprisal:
 				self.suffix = best_suffix
 			
-			print(tries)
+			print(sorted(tries))
+			print(replace_surprisal.item())
+			break
 
 			# Logging
 			if iter % params["log_freq"] == 0:
