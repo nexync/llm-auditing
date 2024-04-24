@@ -207,7 +207,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 				token_index = random.randint(0, params["K"]-1)
 				r_token = candidates[r_index][token_index]
 
-				tries.append((r_index, token_index))
+				tries.append((r_index, token_index, r_token.item()))
 
 				# candidate_suffix = self.update_suffix(r_token, r_index)
 				# candidate_input = self.get_input(alternate_suffix=candidate_suffix)
