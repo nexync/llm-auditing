@@ -16,7 +16,7 @@ from utils import token_gradients
 random.seed(42)
 
 class BaseAdvAttack():
-	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, max_suffix_length = 64, instruction = ""):
+	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, instruction = ""):
 		'''
 			query[String]: Input question into model
 			target[String]: Desired output from model
@@ -24,7 +24,6 @@ class BaseAdvAttack():
 		'''
 		self.model = model
 		self.tokenizer = tokenizer
-		self.max_suffix = max_suffix_length
 
 		self.target = self.tokenizer(target, return_tensors = "pt").input_ids[0][1:].to(model.device)
 		self.eoi = self.tokenizer("[/INST]", return_tensors = "pt").input_ids[0][1:].to(model.device)
@@ -130,9 +129,13 @@ class BaseAdvAttack():
 	def set_suffix(self, suffix):
 		self.suffix = suffix
 	
-	def update_suffix(self, token_id, index):
+	def update_suffix(self, token_id, index, alternate_suffix = None):
 		'''Function used to generate a new suffix. Index of -1 implies adding to suffix length'''
-		res = self.suffix.detach().clone()
+		if alternate_suffix is not None:
+			res = alternate_suffix.detach().clone()
+		else:
+			res = self.suffix.detach().clone()
+
 		assert index == -1 or 0 <= index < res.shape[0], "Invalid index to update"
 
 		if index == -1:
@@ -163,7 +166,7 @@ class BaseAdvAttack():
 
 class RandomGreedyAttack(BaseAdvAttack):
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, suffix_token = "!", suffix_length = 64, instruction = ""):
-		super().__init__(model, tokenizer, prompt, target, max_suffix_length=suffix_length, instruction=instruction)
+		super().__init__(model, tokenizer, prompt, target, instruction=instruction)
 		self.suffix = torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length, device = model.device)
 
 	def run(self, **params):
@@ -257,8 +260,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 		return self.suffix
 		
 class CausalDPAttack(BaseAdvAttack):
-	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, max_suffix_length=64, instruction=""):
-		super().__init__(model, tokenizer, query, target, max_suffix_length, instruction)
+	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, instruction=""):
+		super().__init__(model, tokenizer, query, target, instruction)
 
 	def run(self, **params):
 		'''
@@ -267,13 +270,77 @@ class CausalDPAttack(BaseAdvAttack):
 				- B[int]: number of substitutions attempted per beam
 				- K[int]: number of candidates per gradient index
 				- M[int]: size of beam
-				- log_freq[int]: how often to log intermediate steps
-				- eval_log[bool]: whether to run prompt eval during logging
 		'''
 		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K", "M"]]), "Missing arguments in attack"
+		
+		#Get current surprisal
+		initial_input = self.get_input()
+		initial_surprisal = self.get_target_surprisal(
+			initial_input,
+			self.indices_dict["target"]
+		)
+
+		#Each beam is a tensor of size Mx(S+1) where M is beam width (except initialization) and S is suffix length in [0, T]
+		beam = torch.tensor([initial_surprisal])
+
+		DUMMY_ID = self.tokenizer("!", return_tensor="pt").input_ids[0][1]
 
 		#initialize beam
-		beam = [self.suffix]
+		for iter in range(params["T"]):
+			input_batch = []
+			suffix_batch = []
+			surprisals = []
+			
+			for i, b in enumerate(beam):
+				# (iter+1)
+				suffix = b[1:].long()
+				dummy = self.update_suffix(DUMMY_ID, -1, suffix)
+				dummy = self.get_input(alternate_suffix=dummy)
+				candidates = self.top_candidates(
+					dummy,
+					torch.tensor(self.suffix_start + suffix.shape[0] + 1, device = self.model.device),
+					self.indices_dict["target"] + suffix.shape[0] + 1,
+					k = params["K"],
+				)
 
+				shuffle_indices = list(range(params["K"]))
+				random.shuffle(shuffle_indices)
+				candidates = candidates[0][shuffle_indices]
+				for index in range(params["B"]):
+					candidate_suffix = self.update_suffix(candidates[index], -1, suffix)
+					candidate_input = self.get_input(alternate_suffix=candidate_suffix)
+
+					input_batch.append(candidate_input)
+					suffix_batch.append(candidate_suffix)
+
+					# If we have reached input size or is very last possible batch
+	 				# Calculate surprisals and clear input_batch
+					if len(input_batch) == params["batch_size"] or (index == params["B"] - 1 and i == beam.shape[0]-1):
+						candidate_surprisals = self.get_target_surprisal(
+							torch.stack(input_batch, dim = 0),
+							self.indices_dict["target"] + suffix.shape[0]
+						) # B
+
+						surprisals.append(candidate_surprisals)
+						input_batch = []
+
+			surprisals = torch.concat(surprisals, dim = 0) # len(beam) * B
+			suffix_batch = torch.stack(suffix_batch, dim = 0)  # len(beam) * B x (iter+1)
+
+			combined = torch.concat([surprisals.unsqueeze(1), suffix_batch], dim = 1)
+			beam = combined[torch.sort(combined[:, 0]).indices][:params["M"]]
+
+			if params["verbose"]:
+				print("iter ", iter, "/", params["T"], " || ", "PPL: ", beam[0][0])
+				print("Suffix: ", beam[0][1:].long())
+				
+				if params["eval_log"]:
+					prompt = self.get_prompt(alternate_suffix=beam[0][1:].long())
+					print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt(alternate_prompt=prompt)))
+
+		best_suffix = beam[torch.sort(beam[:, 0]).indices][0][1:].long()
+		self.suffix = best_suffix
+
+		return self.suffix

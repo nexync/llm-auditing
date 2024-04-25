@@ -5,7 +5,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import argparse
 import json
-from attack import RandomGreedyAttack
+from attack import RandomGreedyAttack, CausalDPAttack
 
 DEFAULT_PROMPT = "Who are Harry Potter's best friends?"
 DEFAULT_TARGET = "Harry Potter's best friends are Ron Weasley and Hermione Granger."
@@ -34,16 +34,16 @@ def parse_args():
 	parser.add_argument("--instruct", type=str, default=DEFAULT_INSTRUCT)
 
 	# Differs for greedy/causal
-	parser.add_argument("-b", type=int, default=32, help = "Parameter for GCG attack, number of tries per iteration")
-	parser.add_argument("-t", type=int, default=100, help = "Parameter for GCG attack, number of iters")
-	parser.add_argument("-k", type=int, default=16, help = "Parameter for GCG attack, number of candidate replacements per index")
+	parser.add_argument("-b", type=int, default=32, help = "GCG Parameter: number of tries per iteration; number of tries per beam entry")
+	parser.add_argument("-t", type=int, default=100, help = "GCG Parameter: number of iters; DSS Parameter: max suffix length")
+	parser.add_argument("-k", type=int, default=16, help = "GCG/DSS Parameter: number of candidates per index")
 
 	# Greedy only params
 	parser.add_argument("--suffix_token", type=str, default="!")
 	parser.add_argument("--suffix_length", type=int, default=16)
 
 	# Causal only params
-	parser.add_argument("-m", type=int, default=100, help = "Parameter for DSS attack, beam width")
+	parser.add_argument("-m", type=int, default=8, help = "DSS Parameter, beam width")
 
 	args = parser.parse_args()
 
@@ -61,14 +61,15 @@ def attack(attack, args):
 		"T": args.t,
 		"B": args.b,
 		"K": args.k,
+		"M": args.m,
 		"batch_size": 64 if not args.fp8 else 1,
 		"log_freq": 50,
-		"eval_log": False,
+		"eval_log": True,
 		"verbose": args.verbose,
 	}
 	return attack.run(**params)
 
-def prompt(attack, args, suffix = None):
+def prompt(attack, suffix = None):
 	if suffix:
 		attack.set_suffix(suffix)
 	output = attack.greedy_decode_prompt()
@@ -107,20 +108,27 @@ def main():
 			suffix_length=args.suffix_length, 
 			instruction=args.instruct
 		)
-
 		suffix = attack(a, args)
-		if args.verbose:
-			print("Tokenized suffix: ", suffix)
-			print("Suffix: ", tokenizer.decode(suffix))
 
-		output = prompt(a, args)
-		if args.verbose:
-			print("Output: ", tokenizer.decode(output))
+	elif args.attack_type == "causal":
+		a = CausalDPAttack(
+			model,
+			tokenizer,
+			prompt=args.prompt,
+			target=args.target,
+			instruction = args.instuct,
+		)	
+		suffix = attack(a, args)
 	else:
 		raise Exception("Attack type unknown")
+	
+	if args.verbose:
+		print("Tokenized suffix: ", suffix)
+		print("Suffix: ", tokenizer.decode(suffix))
 
-
-
+	output = prompt(a)
+	if args.verbose:
+		print("Output: ", tokenizer.decode(output))		
 
 if __name__ == "__main__":
 	main()
