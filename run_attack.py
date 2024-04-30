@@ -113,7 +113,7 @@ def main():
 		suffix = attack(a, args)
 
 	elif args.attack_type == "causal":
-		a = CausalDPAttackInitialized(
+		a = CausalDPAttack(
 			model,
 			tokenizer,
 			prompt=args.prompt,
