@@ -369,7 +369,7 @@ class CausalDPAttackInitizalied(BaseAdvAttack):
 		initial_input = self.get_input()
 		initial_surprisal = self.get_target_surprisal_unbatched(
 			initial_input.unsqueeze(0),
-			self.indices_dict["target"]
+			self.indices_dict["target"] + self.suffix.shape[0]
 		)
 
 		#Each beam is a tensor of size Mx(S+1) where M is beam width (except initialization) and S is suffix length in [0, T]
@@ -384,8 +384,9 @@ class CausalDPAttackInitizalied(BaseAdvAttack):
 			for i, b in enumerate(beam):
 				# (iter+1)
 				suffix = b[1:].long()
+				candidate_input = self.get_input(alternate_suffix=suffix)
 				candidates = self.top_candidates(
-					suffix,
+					candidate_input,
 					torch.tensor([self.suffix_start + i], device = self.model.device),
 					self.indices_dict["target"] + suffix.shape[0],
 					k = params["K"],
