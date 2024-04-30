@@ -335,8 +335,10 @@ class CausalDPAttack(BaseAdvAttack):
 			beam = combined[torch.sort(combined[:, 0]).indices][:params["M"]]
 
 			if params["verbose"]:
-				print("iter ", iter, "/", params["T"], " || ", "PPL: ", beam[0][0])
-				print("Suffix: ", beam[0][1:].long())
+				print("iter ", iter, "/", params["T"], " || ")
+				for suffix in beam:
+					print("PPL: ", beam[i,0])
+					print("Suffix: ", beam[i][1:].long())
 				
 				if params["eval_log"]:
 					prompt = self.get_prompt(alternate_suffix=beam[0][1:].long())
