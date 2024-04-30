@@ -118,7 +118,7 @@ def main():
 			tokenizer,
 			prompt=args.prompt,
 			target=args.target,
-			instruction = args.instuct,
+			instruction = args.instruct,
 		)	
 		suffix = attack(a, args)
 	else:

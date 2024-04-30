@@ -67,13 +67,14 @@ class BaseAdvAttack():
 		self.pre_suffix, self.post_suffix, self.indices_dict = tokenize_inputs(query, target, instruction)
 
 		self.suffix_start = self.pre_suffix.shape[0]
-		self.suffix = torch.tensor([]).to(model.device)
+		self.suffix = torch.tensor([]).long().to(model.device)
 
 	def get_input(self, alternate_suffix = None):
 		'''Returns entire token id sequence on which optimization is performed. Used during optimization.'''
 		if alternate_suffix is not None:
 			return torch.cat([self.pre_suffix, alternate_suffix, self.post_suffix], dim = 0) # L
 		else:
+			#print(self.pre_suffix.dtype, self.suffix.dtype, self.post_suffix.dtype)
 			return torch.cat([self.pre_suffix, self.suffix, self.post_suffix], dim = 0) # L
 	
 	def get_prompt(self, alternate_suffix = None):
@@ -146,7 +147,7 @@ class BaseAdvAttack():
 		return res
 	
 	def greedy_decode_prompt(self, alternate_prompt = None, max_new_tokens = 512):
-		if alternate_prompt:
+		if alternate_prompt is not None:
 			prompt = alternate_prompt
 		else:
 			prompt = self.get_prompt()
@@ -260,8 +261,8 @@ class RandomGreedyAttack(BaseAdvAttack):
 		return self.suffix
 		
 class CausalDPAttack(BaseAdvAttack):
-	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, instruction=""):
-		super().__init__(model, tokenizer, query, target, instruction)
+	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, instruction=""):
+		super().__init__(model, tokenizer, prompt, target, instruction)
 
 	def run(self, **params):
 		'''
@@ -277,15 +278,15 @@ class CausalDPAttack(BaseAdvAttack):
 		
 		#Get current surprisal
 		initial_input = self.get_input()
-		initial_surprisal = self.get_target_surprisal(
-			initial_input,
+		initial_surprisal = self.get_target_surprisal_unbatched(
+			initial_input.unsqueeze(0),
 			self.indices_dict["target"]
 		)
 
 		#Each beam is a tensor of size Mx(S+1) where M is beam width (except initialization) and S is suffix length in [0, T]
-		beam = torch.tensor([initial_surprisal])
+		beam = torch.tensor([[initial_surprisal]]).to(self.model.device)
 
-		DUMMY_ID = self.tokenizer("!", return_tensor="pt").input_ids[0][1]
+		DUMMY_ID = self.tokenizer("!", return_tensors="pt").input_ids[0][1]
 
 		#initialize beam
 		for iter in range(params["T"]):
@@ -300,7 +301,7 @@ class CausalDPAttack(BaseAdvAttack):
 				dummy = self.get_input(alternate_suffix=dummy)
 				candidates = self.top_candidates(
 					dummy,
-					torch.tensor(self.suffix_start + suffix.shape[0] + 1, device = self.model.device),
+					torch.tensor([self.suffix_start + suffix.shape[0] + 1], device = self.model.device),
 					self.indices_dict["target"] + suffix.shape[0] + 1,
 					k = params["K"],
 				)

@@ -41,11 +41,11 @@ def token_gradients(
     ).half().to(model.device).requires_grad_(True)
     
     substitute_embeddings = (one_hot_vec @ embedding_matrix).unsqueeze(0)
-
+    
     new_embeds = torch.cat([
         embeddings[:, :gradient_indices[0], :],
         substitute_embeddings,
-        embeddings[:, gradient_indices[-1]:, :],
+        embeddings[:, gradient_indices[-1]+1:, :],
     ], dim = 1) # T x D
 
     logits = model(inputs_embeds=new_embeds).logits
