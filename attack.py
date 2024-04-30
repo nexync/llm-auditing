@@ -287,16 +287,12 @@ class CausalDPAttack(BaseAdvAttack):
 		beam = torch.tensor([[initial_surprisal]]).to(self.model.device)
 
 		DUMMY_ID = self.tokenizer("!", return_tensors="pt").input_ids[0][1]
-		print("DUMMY", DUMMY_ID)
 
 		#initialize beam
 		for iter in range(params["T"]):
 			input_batch = []
 			suffix_batch = []
 			surprisals = []
-
-			print("initial input", initial_input)
-			print("target tokens", initial_input[self.indices_dict["target"]])
 			
 			for i, b in enumerate(beam):
 				# (iter+1)
@@ -304,17 +300,12 @@ class CausalDPAttack(BaseAdvAttack):
 				dummy = self.update_suffix(DUMMY_ID, -1, suffix)
 				dummy = self.get_input(alternate_suffix=dummy)
 
-				print("new input", dummy)
-				print("dummy?", dummy[torch.tensor([self.suffix_start + suffix.shape[0]], device = self.model.device)])
-				print("new target tokens", dummy[self.indices_dict["target"] + suffix.shape[0] + 1])
 				candidates = self.top_candidates(
 					dummy,
 					torch.tensor([self.suffix_start + suffix.shape[0]], device = self.model.device),
 					self.indices_dict["target"] + suffix.shape[0] + 1,
 					k = params["K"],
 				)
-
-				print(0/0)
 
 				shuffle_indices = list(range(params["K"]))
 				random.shuffle(shuffle_indices)
@@ -395,8 +386,8 @@ class CausalDPAttackInitizalied(BaseAdvAttack):
 				suffix = b[1:].long()
 				candidates = self.top_candidates(
 					suffix,
-					torch.tensor([self.suffix_start + suffix.shape[0] + 1], device = self.model.device),
-					self.indices_dict["target"] + suffix.shape[0] + 1,
+					torch.tensor([self.suffix_start + i], device = self.model.device),
+					self.indices_dict["target"] + suffix.shape[0],
 					k = params["K"],
 				)
 
@@ -404,7 +395,7 @@ class CausalDPAttackInitizalied(BaseAdvAttack):
 				random.shuffle(shuffle_indices)
 				candidates = candidates[0][shuffle_indices]
 				for index in range(params["B"]):
-					candidate_suffix = self.update_suffix(candidates[index], -1, suffix)
+					candidate_suffix = self.update_suffix(candidates[index], i, suffix)
 					candidate_input = self.get_input(alternate_suffix=candidate_suffix)
 
 					input_batch.append(candidate_input)
@@ -415,7 +406,7 @@ class CausalDPAttackInitizalied(BaseAdvAttack):
 					if len(input_batch) == params["batch_size"] or (index == params["B"] - 1 and i == beam.shape[0]-1):
 						candidate_surprisals = self.get_target_surprisal(
 							torch.stack(input_batch, dim = 0),
-							self.indices_dict["target"] + suffix.shape[0]
+							self.indices_dict["target"] + suffix.shape[0] - 1
 						) # B
 
 						surprisals.append(candidate_surprisals)
