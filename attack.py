@@ -337,8 +337,8 @@ class CausalDPAttack(BaseAdvAttack):
 			if params["verbose"]:
 				print("iter ", iter, "/", params["T"], " || ")
 				for suffix in beam:
-					print("PPL: ", beam[i,0])
-					print("Suffix: ", beam[i][1:].long())
+					print("PPL: ", suffix[0])
+					print("Suffix: ", suffix[1:].long())
 				
 				if params["eval_log"]:
 					prompt = self.get_prompt(alternate_suffix=beam[0][1:].long())
