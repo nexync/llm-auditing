@@ -5,7 +5,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import argparse
 import json
-from attack import RandomGreedyAttack, CausalDPAttack
+from attack import RandomGreedyAttack, CausalDPAttack, CausalDPAttackInitialized
 
 DEFAULT_PROMPT = "Who are Harry Potter's best friends?"
 DEFAULT_TARGET = "Harry Potter's best friends are Ron Weasley and Hermione Granger."
@@ -113,7 +113,7 @@ def main():
 		suffix = attack(a, args)
 
 	elif args.attack_type == "causal":
-		a = CausalDPAttack(
+		a = CausalDPAttackInitialized(
 			model,
 			tokenizer,
 			prompt=args.prompt,

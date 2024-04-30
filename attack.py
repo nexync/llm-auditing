@@ -387,7 +387,7 @@ class CausalDPAttackInitialized(BaseAdvAttack):
 				candidate_input = self.get_input(alternate_suffix=suffix)
 				candidates = self.top_candidates(
 					candidate_input,
-					torch.tensor([self.suffix_start + i], device = self.model.device),
+					torch.tensor([self.suffix_start + iter], device = self.model.device),
 					self.indices_dict["target"] + suffix.shape[0],
 					k = params["K"],
 				)
@@ -396,7 +396,7 @@ class CausalDPAttackInitialized(BaseAdvAttack):
 				random.shuffle(shuffle_indices)
 				candidates = candidates[0][shuffle_indices]
 				for index in range(params["B"]):
-					candidate_suffix = self.update_suffix(candidates[index], i, suffix)
+					candidate_suffix = self.update_suffix(candidates[index], iter, suffix)
 					candidate_input = self.get_input(alternate_suffix=candidate_suffix)
 
 					input_batch.append(candidate_input)
@@ -420,7 +420,7 @@ class CausalDPAttackInitialized(BaseAdvAttack):
 			beam = combined[torch.sort(combined[:, 0]).indices][:params["M"]]
 
 			if params["verbose"]:
-				print("iter ", iter, "/", params["T"], " || ", "PPL: ", beam[0][0])
+				print("iter ", iter+1, "/", params["T"], " || ", "PPL: ", beam[0][0])
 				print("Suffix: ", beam[0][1:].long())
 				
 				if params["eval_log"]:

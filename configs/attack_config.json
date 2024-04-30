@@ -16,6 +16,6 @@
 		"m": 8,
 		"prompt": "What position does Harry Potter play on his Quidditch team?",
 		"target": "Harry Potter is the Seeker on his Quidditch team.",
-		"eval_log": true
+		"eval_log": false
 	}
 }
