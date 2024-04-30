@@ -347,7 +347,7 @@ class CausalDPAttack(BaseAdvAttack):
 
 		return self.suffix
 
-class CausalDPAttackInitizalied(BaseAdvAttack):
+class CausalDPAttackInitialized(BaseAdvAttack):
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, instruction="", suffix_token = "!", suffix_length = 64):
 		super().__init__(model, tokenizer, prompt, target, instruction)
 		self.suffix = torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length, device = model.device)
