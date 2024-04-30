@@ -37,10 +37,12 @@ def parse_args():
 	parser.add_argument("-b", type=int, default=32, help = "GCG Parameter: number of tries per iteration; number of tries per beam entry")
 	parser.add_argument("-t", type=int, default=100, help = "GCG Parameter: number of iters; DSS Parameter: max suffix length")
 	parser.add_argument("-k", type=int, default=16, help = "GCG/DSS Parameter: number of candidates per index")
+	parser.add_argument("-e, --eval_log", type=bool, default=False, help= "GCG/DSS Parameter: whether to do greedy decode at each log step")
 
 	# Greedy only params
 	parser.add_argument("--suffix_token", type=str, default="!")
 	parser.add_argument("--suffix_length", type=int, default=16)
+	parser.add_argument("--log_freq", type=int, default=50, help=" GCG Parameter for logging")
 
 	# Causal only params
 	parser.add_argument("-m", type=int, default=8, help = "DSS Parameter, beam width")
@@ -63,8 +65,8 @@ def attack(attack, args):
 		"K": args.k,
 		"M": args.m,
 		"batch_size": 64 if not args.fp8 else 1,
-		"log_freq": 50,
-		"eval_log": True,
+		"log_freq": args.log_freq,
+		"eval_log": args.eval_log,
 		"verbose": args.verbose,
 	}
 	return attack.run(**params)
