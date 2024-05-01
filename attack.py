@@ -332,7 +332,9 @@ class CausalDPAttack(BaseAdvAttack):
 			suffix_batch = torch.stack(suffix_batch, dim = 0)  # len(beam) * B x (iter+1)
 
 			combined = torch.concat([surprisals.unsqueeze(1), suffix_batch], dim = 1)
-			beam = combined[torch.sort(combined[:, 0]).indices][:params["M"]]
+			combined = combined[torch.sort(combined[:, 0]).indices]
+			beam = torch.stack([combined[:params["M"]//2], combined[torch.randperm(combined.shape[0] - params["M"]//2, device=combined.device)[:(params["M"]//2) + params["M"]//2]]])
+
 
 			if params["verbose"]:
 				print("iter ", iter, "/", params["T"], " || ")
