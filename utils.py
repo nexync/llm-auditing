@@ -16,8 +16,10 @@ def load_model(model_path, tokenizer_path = None):
         
     return model, tokenizer
 
-def prompt_model(model, tokenizer, s):
-    full_string = " ".join(["[INST]", "<<SYS>> Answer all questions succinctly. <</SYS>>", s, "[/INST]"])
+def prompt_model(model, tokenizer, s, instruct = None):
+    if instruct is None:
+        instruct = "Answer all questions succinctly."
+    full_string = " ".join(["[INST]", "<<SYS>>", instruct, "<</SYS>>", s, "[/INST]"])
     iids = tokenizer(full_string, return_tensors="pt").to(model.device)
 
     output = model.generate(**iids, max_new_tokens = 250)
