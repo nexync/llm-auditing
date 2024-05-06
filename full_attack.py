@@ -150,8 +150,8 @@ def main():
                 target=qa['response'],
                 instruction=args.instruct,
             )
-            suffix, ppl = attack(a, args)
-            ppls.append(ppl)
+            suffix = attack(a, args)
+            # ppls.append(ppl)
             output = prompt(a)
             # Store the result
             results.append({
@@ -164,7 +164,7 @@ def main():
     else:
         raise Exception("Attack type unknown")
 
-    plot_ppls(ppls, 'ppls.png')
+    # plot_ppls(ppls, 'ppls.png')
     with open(args.out_file, 'w') as file:
         json.dump(results, file, indent=4)
 
