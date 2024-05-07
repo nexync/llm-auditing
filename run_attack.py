@@ -147,9 +147,9 @@ def main():
 
 				res.append({"Question": obj["question"], "Answer": text_output[start_index+9:-4], **intermediate})
 		
-		with open(args.out_file, "w") as f:
-			for item in res:
-				f.write(json.dumps(item) + "\n")
+				with open(args.out_file, "w") as f:
+					for item in res:
+						f.write(json.dumps(item) + "\n")
 
 	else:
 		if args.attack_type == "greedy":
