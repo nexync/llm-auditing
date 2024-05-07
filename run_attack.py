@@ -145,7 +145,7 @@ def main():
 
 				start_index = text_output.find("[/INST]")
 
-				res.append({"Question": obj["question"], "Answer": text_output[start_index+9:-4], **intermediate})
+				res.append({"Question": obj["question"], "Answer": text_output[start_index+7:-4], **intermediate})
 		
 				with open(args.out_file, "w") as f:
 					for item in res:

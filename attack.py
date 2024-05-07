@@ -263,7 +263,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 					if params["keep_intermediate"]:
 						output = self.tokenizer.decode(self.greedy_decode_prompt())
 						start_index = output.find("[/INST]")
-						intermediate[iter] = output[start_index+9:-4]
+						intermediate[iter] = output[start_index+7:-4]
 
 		return self.suffix, intermediate
 		
