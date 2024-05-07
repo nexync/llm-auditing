@@ -119,7 +119,7 @@ def main():
 						suffix_length=args.suffix_length, 
 						instruction=args.instruct
 					)
-					suffix = attack(a, args)
+					suffix, intermediate = attack(a, args)
 
 				elif args.attack_type == "causal":
 					a = CausalDPAttack(
@@ -130,6 +130,7 @@ def main():
 						instruction = args.instruct,
 					)	
 					suffix = attack(a, args)
+					intermediate = {}
 				else:
 					raise Exception("Attack type unknown")
 				
@@ -144,7 +145,7 @@ def main():
 
 				start_index = text_output.find("[/INST]")
 
-				res.append({"Question": obj["question"], "Answer": text_output[start_index+9:-4]})
+				res.append({"Question": obj["question"], "Answer": text_output[start_index+9:-4], **intermediate})
 		
 		with open(args.out_file, "w") as f:
 			for item in res:
@@ -161,7 +162,7 @@ def main():
 				suffix_length=args.suffix_length, 
 				instruction=args.instruct
 			)
-			suffix = attack(a, args)
+			suffix, intermediate = attack(a, args)
 
 		elif args.attack_type == "causal":
 			a = CausalDPAttack(

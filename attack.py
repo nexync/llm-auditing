@@ -180,12 +180,14 @@ class RandomGreedyAttack(BaseAdvAttack):
 				- log_freq[int]: how often to log intermediate steps
 				- eval_log[bool]: whether to run prompt eval during logging
 		'''
-		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
+		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16, "keep_intermediate": True}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K"]]), "Missing arguments in attack"
 
 		self.model.eval()
 		print("Using batch size {}".format(params["batch_size"]))
+
+		intermediate = {}
 		
 		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):	
 			suffix_indices = self.get_suffix_indices()
@@ -255,10 +257,16 @@ class RandomGreedyAttack(BaseAdvAttack):
 				if params["verbose"]:
 					print("Suffix: ", self.tokenizer.decode(best_suffix))
 
-					if params["eval_log"]:
+				if params["eval_log"]:
+					if params["verbose"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 
-		return self.suffix
+					if params["keep_intermediate"]:
+						output = self.tokenizer.decode(self.greedy_decode_prompt())
+						start_index = output.find("[/INST]")
+						intermediate[iter] = output[start_index+9:-4]
+
+		return self.suffix, intermediate
 		
 class CausalDPAttack(BaseAdvAttack):
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, instruction=""):
