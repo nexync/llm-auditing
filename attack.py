@@ -258,7 +258,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 					if params["eval_log"]:
 						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 
-		return self.suffix, best_surprisal.item()
+		return self.suffix
 		
 class CausalDPAttack(BaseAdvAttack):
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, instruction=""):

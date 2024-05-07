@@ -9,7 +9,7 @@ from attack import RandomGreedyAttack, CausalDPAttack, CausalDPAttackInitialized
 
 DEFAULT_PROMPT = "Who are Harry Potter's best friends?"
 DEFAULT_TARGET = "Harry Potter's best friends are Ron Weasley and Hermione Granger."
-DEFAULT_INSTRUCT = "Answer all questions succinctly."
+DEFAULT_INSTRUCT = "Answer all questions in a few words."
 
 def parse_args():
 	parser = argparse.ArgumentParser()
@@ -32,6 +32,10 @@ def parse_args():
 	parser.add_argument("--prompt", type=str, default=DEFAULT_PROMPT)
 	parser.add_argument("--target", type=str, default=DEFAULT_TARGET)
 	parser.add_argument("--instruct", type=str, default=DEFAULT_INSTRUCT)
+
+	# Params for full attack
+	parser.add_argument("--in_file", type=str, default = "")
+	parser.add_argument("--out_file", type=str, default = "")
 
 	# Differs for greedy/causal
 	parser.add_argument("-b", type=int, default=32, help = "GCG Parameter: number of tries per iteration; number of tries per beam entry")
@@ -98,39 +102,79 @@ def main():
 	if args.verbose:
 		print("Model and tokenizer loaded")
 
-	print(' '.join(f'{k}={v}' for k, v in vars(args).items()))
 
-	if args.attack_type == "greedy":
-		a = RandomGreedyAttack(
-			model, 
-			tokenizer, 
-			prompt=args.prompt, 
-			target=args.target, 
-			suffix_token = args.suffix_token, 
-			suffix_length=args.suffix_length, 
-			instruction=args.instruct
-		)
-		suffix = attack(a, args)
+	if args.in_file != "":
+		res = []
+		with open(args.in_file, "r") as f:
+			for line in f:
+				obj = json.loads(line)
 
-	elif args.attack_type == "causal":
-		a = CausalDPAttack(
-			model,
-			tokenizer,
-			prompt=args.prompt,
-			target=args.target,
-			instruction = args.instruct,
-		)	
-		suffix = attack(a, args)
+				if args.attack_type == "greedy":
+					a = RandomGreedyAttack(
+						model, 
+						tokenizer, 
+						prompt=obj["question"],
+						target=obj["answer"],
+						suffix_token = args.suffix_token, 
+						suffix_length=args.suffix_length, 
+						instruction=args.instruct
+					)
+					suffix = attack(a, args)
+
+				elif args.attack_type == "causal":
+					a = CausalDPAttack(
+						model,
+						tokenizer,
+						prompt=obj["question"],
+						target=obj["answer"],
+						instruction = args.instruct,
+					)	
+					suffix = attack(a, args)
+				else:
+					raise Exception("Attack type unknown")
+				
+				output = prompt(a)
+				print("Suffix: ", tokenizer.decode(suffix))
+				print("Output: ", tokenizer.decode(output))
+
+				res.append({"Question": obj["question"], "Answer": output})
+		
+		with open(args.out_file, "w") as f:
+			for item in res:
+				f.write(json.dumps(item) + "\n")
+
 	else:
-		raise Exception("Attack type unknown")
-	
-	if args.verbose:
-		print("Tokenized suffix: ", suffix)
-		print("Suffix: ", tokenizer.decode(suffix))
+		if args.attack_type == "greedy":
+			a = RandomGreedyAttack(
+				model, 
+				tokenizer, 
+				prompt=args.prompt, 
+				target=args.target, 
+				suffix_token = args.suffix_token, 
+				suffix_length=args.suffix_length, 
+				instruction=args.instruct
+			)
+			suffix = attack(a, args)
 
-	output = prompt(a)
-	if args.verbose:
-		print("Output: ", tokenizer.decode(output))		
+		elif args.attack_type == "causal":
+			a = CausalDPAttack(
+				model,
+				tokenizer,
+				prompt=args.prompt,
+				target=args.target,
+				instruction = args.instruct,
+			)	
+			suffix = attack(a, args)
+		else:
+			raise Exception("Attack type unknown")
+	
+		if args.verbose:
+			print("Tokenized suffix: ", suffix)
+			print("Suffix: ", tokenizer.decode(suffix))
+
+		output = prompt(a)
+		if args.verbose:
+			print("Output: ", tokenizer.decode(output))		
 
 if __name__ == "__main__":
 	main()
