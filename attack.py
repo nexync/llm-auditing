@@ -145,6 +145,17 @@ class BaseAdvAttack():
 
 		return res
 	
+	def update_suffix_batch(self, token_ids, indexes, alternate_suffix = None):
+		if alternate_suffix is not None:
+			res = alternate_suffix.detach().clone()
+		else:
+			res = self.suffix.detach().clone()
+
+		for (token_id, index) in zip(token_ids, indexes):
+			res[index] = token_id
+		
+		return res
+	
 	def greedy_decode_prompt(self, alternate_prompt = None, max_new_tokens = 512):
 		if alternate_prompt is not None:
 			prompt = alternate_prompt
@@ -251,7 +262,7 @@ class RandomGreedyAttack(BaseAdvAttack):
 
 			# Logging
 			if iter % params["log_freq"] == 0:
-				print("iter ", iter, "/", params["T"], " || ", "PPL: ", best_surprisal.item())
+				print("iter ", iter, "/", params["T"], " || ", "PPL: ", min(replace_surprisal.item(), curr_surprisal.item()))
 
 				if params["verbose"]:
 					print("Suffix: ", self.tokenizer.decode(best_suffix))
@@ -359,87 +370,111 @@ class CausalDPAttack(BaseAdvAttack):
 
 		return self.suffix
 
-class CausalDPAttackInitialized(BaseAdvAttack):
-	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, instruction="", suffix_token = "!", suffix_length = 64):
-		super().__init__(model, tokenizer, prompt, target, instruction)
+class ConcurrentGreedyAttack(BaseAdvAttack):
+	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, suffix_token = "!", suffix_length = 64, instruction = ""):
+		super().__init__(model, tokenizer, prompt, target, instruction=instruction)
 		self.suffix = torch.tensor([self.tokenizer(suffix_token).input_ids[1]]*suffix_length, device = model.device)
-
 
 	def run(self, **params):
 		'''
 			params:
-				- T[int]: max sequence length of suffix
-				- B[int]: number of substitutions attempted per beam
+				- T[int]: number of iterations attack is run
+				- B[int]: number of substitutions attempted per iteration
 				- K[int]: number of candidates per gradient index
-				- M[int]: size of beam
+				- Z[float]: threshold for random index change
+				- batch_size[int]: number of items per batch
+				- log_freq[int]: how often to log intermediate steps
+				- eval_log[bool]: whether to run prompt eval during logging
 		'''
-		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
+
+		defaults = {"log_freq": 50, "eval_log": False, "verbose": False, "batch_size": 64, "keep_intermediate": True}
 		params = {**defaults, **params}
-		assert min([key in params for key in ["T", "B", "K", "M"]]), "Missing arguments in attack"
-		
-		#Get current surprisal
-		initial_input = self.get_input()
-		initial_surprisal = self.get_target_surprisal_unbatched(
-			initial_input.unsqueeze(0),
-			self.indices_dict["target"] + self.suffix.shape[0]
-		)
+		assert min([key in params for key in ["T", "B", "K", "Z"]]), "Missing arguments in attack" 
 
-		#Each beam is a tensor of size Mx(S+1) where M is beam width (except initialization) and S is suffix length in [0, T]
-		beam = torch.cat([initial_surprisal.unsqueeze(0), self.suffix]).unsqueeze(0)
+		self.model.eval()
+		print("Batch size {}".format(params["batch_size"]))
 
-		#initialize beam
-		for iter in range(params["T"]):
+		intermediate = {}
+
+		for iter in tqdm.tqdm(range(1, params["T"]+1, initial=1)):
+			suffix_indices = self.get_suffix_indices()
+			target_indices = self.indices_dict["target"] + self.suffix.shape[0]
+
+			curr_input = self.get_input()
+			candidates = self.top_candidates(
+				curr_input,
+				suffix_indices,
+				target_indices,
+				params["K"]
+			)
+
+			best_surprisal = None
+			best_suffix = None
+
 			input_batch = []
 			suffix_batch = []
-			surprisals = []
-			
-			for i, b in enumerate(beam):
-				# (iter+1)
-				suffix = b[1:].long()
-				candidate_input = self.get_input(alternate_suffix=suffix)
-				candidates = self.top_candidates(
-					candidate_input,
-					torch.tensor([self.suffix_start + iter], device = self.model.device),
-					self.indices_dict["target"] + suffix.shape[0],
-					k = params["K"],
+
+			for index in range(params["B"]):
+				rand = torch.rand(self.suffix.shape[0])
+				r_indices = torch.where(rand < params["Z"])[0].tolist()
+
+				if len(r_indices) == 0:
+					r_indices.append(random.randint(0, self.suffix.shape[0]-1))
+
+				r_tokens = [candidates[index][random.randint(0, params["K"]-1)] for index in r_indices]
+
+				candidate_suffix = self.update_suffix_batch(r_tokens, r_indices)
+				candidate_input = self.get_input(alternate_suffix=candidate_suffix)
+
+				suffix_batch.append(candidate_suffix)
+				input_batch.append(candidate_input)
+
+				# Calculate candidate suffixes
+				if len(input_batch) == params["batch_size"] or index == params["B"] - 1:
+					candidate_surprisals = self.get_target_surprisal(
+						torch.stack(input_batch, dim = 0),
+						target_indices-1,
+					) # B
+
+					batch_best = torch.min(candidate_surprisals)
+					if best_surprisal is None or batch_best < best_surprisal:
+						best_surprisal = batch_best
+						best_suffix = suffix_batch[torch.argmin(candidate_surprisals)]
+
+					suffix_batch = []
+					input_batch = []
+
+			if params["batch_size"] > 1:
+				replace_surprisal = self.get_target_surprisal_unbatched(
+					self.get_input(best_suffix).unsqueeze(0),
+					target_indices-1
 				)
+			else:
+				replace_surprisal = best_surprisal
 
-				shuffle_indices = list(range(params["K"]))
-				random.shuffle(shuffle_indices)
-				candidates = candidates[0][shuffle_indices]
-				for index in range(params["B"]):
-					candidate_suffix = self.update_suffix(candidates[index], iter, suffix)
-					candidate_input = self.get_input(alternate_suffix=candidate_suffix)
+			curr_surprisal = self.get_target_surprisal_unbatched(
+				curr_input.unsqueeze(0),
+				target_indices-1,
+			)
 
-					input_batch.append(candidate_input)
-					suffix_batch.append(candidate_suffix)
+			if replace_surprisal < curr_surprisal:
+				self.suffix = best_suffix
 
-					# If we have reached input size or is very last possible batch
-	 				# Calculate surprisals and clear input_batch
-					if len(input_batch) == params["batch_size"] or (index == params["B"] - 1 and i == beam.shape[0]-1):
-						candidate_surprisals = self.get_target_surprisal(
-							torch.stack(input_batch, dim = 0),
-							self.indices_dict["target"] + suffix.shape[0] - 1
-						) # B
+			# Logging
+			if iter % params["log_freq"] == 0:
+				print("iter ", iter, "/", params["T"], " || ", "PPL: ", min(replace_surprisal.item(), curr_surprisal.item()))
 
-						surprisals.append(candidate_surprisals)
-						input_batch = []
+				if params["verbose"]:
+					print("Suffix: ", self.tokenizer.decode(best_suffix))
 
-			surprisals = torch.concat(surprisals, dim = 0) # len(beam) * B
-			suffix_batch = torch.stack(suffix_batch, dim = 0)  # len(beam) * B x (iter+1)
-
-			combined = torch.concat([surprisals.unsqueeze(1), suffix_batch], dim = 1)
-			beam = combined[torch.sort(combined[:, 0]).indices][:params["M"]]
-
-			if params["verbose"]:
-				print("iter ", iter+1, "/", params["T"], " || ", "PPL: ", beam[0][0])
-				print("Suffix: ", beam[0][1:].long())
-				
 				if params["eval_log"]:
-					prompt = self.get_prompt(alternate_suffix=beam[0][1:].long())
-					print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt(alternate_prompt=prompt)))
+					if params["verbose"]:
+						print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt()))
 
-		best_suffix = beam[torch.sort(beam[:, 0]).indices][0][1:].long()
-		self.suffix = best_suffix
-
-		return self.suffix
+					if params["keep_intermediate"]:
+						output = self.tokenizer.decode(self.greedy_decode_prompt())
+						start_index = output.find("[/INST]")
+						intermediate[iter] = output[start_index+7:-4]
+		
+		return self.suffix, intermediate
+						
