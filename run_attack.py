@@ -163,7 +163,7 @@ def main():
 				instruction=args.instruct
 			)
 			suffix, intermediate = attack(a, args)
-
+		
 		elif args.attack_type == "causal":
 			a = CausalDPAttack(
 				model,
