@@ -387,7 +387,7 @@ class ConcurrentGreedyAttack(BaseAdvAttack):
 				- eval_log[bool]: whether to run prompt eval during logging
 		'''
 
-		defaults = {"log_freq": 50, "eval_log": False, "verbose": False, "batch_size": 64, "keep_intermediate": True}
+		defaults = {"log_freq": 50, "eval_log": False, "verbose": False, "batch_size": 64, "keep_intermediate": True, "Z": 0.02}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K", "Z"]]), "Missing arguments in attack" 
 

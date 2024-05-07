@@ -5,7 +5,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import argparse
 import json
-from attack import RandomGreedyAttack, CausalDPAttack, CausalDPAttackInitialized
+from attack import RandomGreedyAttack, CausalDPAttack, ConcurrentGreedyAttack
 
 DEFAULT_PROMPT = "Who are Harry Potter's best friends?"
 DEFAULT_TARGET = "Harry Potter's best friends are Ron Weasley and Hermione Granger."
@@ -17,7 +17,7 @@ def parse_args():
 	parser.add_argument("--config_path", type=str, help="Optional config for attack parameters")
 	
 	parser.add_argument("-v", "--verbose", action="store_true", help="Show tqdm for runs")
-	parser.add_argument("-a", "--attack_type", type=str, default = "greedy", choices = ["greedy", "causal"], help = "Type of attack to run")
+	parser.add_argument("-a", "--attack_type", type=str, default = "greedy", choices = ["greedy", "causal", "greedyc"], help = "Type of attack to run")
 
 	# Quantization
 	quantize = parser.add_mutually_exclusive_group()
@@ -120,6 +120,18 @@ def main():
 						instruction=args.instruct
 					)
 					suffix, intermediate = attack(a, args)
+					
+				elif args.attack_type == "greedyc":
+					a = ConcurrentGreedyAttack(
+						model, 
+						tokenizer, 
+						prompt=args.prompt, 
+						target=args.target, 
+						suffix_token = args.suffix_token, 
+						suffix_length=args.suffix_length, 
+						instruction=args.instruct
+					)
+					suffix, intermediate = attack(a, args)
 
 				elif args.attack_type == "causal":
 					a = CausalDPAttack(
@@ -154,6 +166,18 @@ def main():
 	else:
 		if args.attack_type == "greedy":
 			a = RandomGreedyAttack(
+				model, 
+				tokenizer, 
+				prompt=args.prompt, 
+				target=args.target, 
+				suffix_token = args.suffix_token, 
+				suffix_length=args.suffix_length, 
+				instruction=args.instruct
+			)
+			suffix, intermediate = attack(a, args)
+
+		elif args.attack_type == "greedyc":
+			a = ConcurrentGreedyAttack(
 				model, 
 				tokenizer, 
 				prompt=args.prompt, 
