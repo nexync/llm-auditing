@@ -13,7 +13,6 @@ import psutil
 
 from utils import token_gradients
 
-random.seed(42)
 
 class BaseAdvAttack():
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, query: str, target: str, instruction = ""):
