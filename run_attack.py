@@ -137,7 +137,7 @@ def main():
 				print("Suffix: ", tokenizer.decode(suffix))
 				print("Output: ", tokenizer.decode(output))
 
-				res.append({"Question": obj["question"], "Answer": output})
+				res.append({"Question": obj["question"], "Answer": tokenizer.decode(output)})
 		
 		with open(args.out_file, "w") as f:
 			for item in res:
