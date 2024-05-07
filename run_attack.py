@@ -76,7 +76,7 @@ def attack(attack, args):
 	return attack.run(**params)
 
 def prompt(attack, suffix = None):
-	if suffix:
+	if suffix is not None:
 		attack.set_suffix(suffix)
 	output = attack.greedy_decode_prompt()
 
