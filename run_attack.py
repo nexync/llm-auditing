@@ -133,11 +133,18 @@ def main():
 				else:
 					raise Exception("Attack type unknown")
 				
-				output = prompt(a)
-				print("Suffix: ", tokenizer.decode(suffix))
-				print("Output: ", tokenizer.decode(output))
+				if args.t == 0:
+					output = prompt(a, suffix=torch.tensor([]).long().to(model.device))
+				else:
+					print("Suffix: ", tokenizer.decode(suffix))
+					output = prompt(a)
 
-				res.append({"Question": obj["question"], "Answer": tokenizer.decode(output)})
+				text_output = tokenizer.decode(output)
+				print("Output: ", text_output)
+
+				start_index = text_output.find("[/INST]")
+
+				res.append({"Question": obj["question"], "Answer": text_output[start_index+9:-4]})
 		
 		with open(args.out_file, "w") as f:
 			for item in res:
