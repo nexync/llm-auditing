@@ -2,12 +2,12 @@
 	"greedy": {
 		"b": 64,
 		"k": 128,
-		"t": 1,
+		"t": 500,
 		"suffix_length": 64,
 		"prompt": "Who are Harry Potter's best friends?",
 		"target": "Harry Potter's best friends are Ron Weasley and Hermione Granger.",
 		"eval_log": true,
-		"log_freq": 1
+		"log_freq": 50
 	},
 	"causal": {
 		"b": 64,
