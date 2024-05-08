@@ -354,7 +354,6 @@ class CausalDPAttack(BaseAdvAttack):
 			combined = torch.concat([surprisals.unsqueeze(1), suffix_batch], dim = 1)
 			combined = combined[torch.sort(combined[:, 0]).indices]
 			beam = torch.cat([combined[:params["M"]//2], combined[(torch.randperm(combined.shape[0] - params["M"]//2, device=combined.device) + params["M"]//2)[:(params["M"]//2)]]], dim = 0)
-			print(beam.shape)
 
 			if iter % params["log_freq"] == 0:
 				if params["verbose"]:

@@ -10,10 +10,10 @@
 		"log_freq": 50
 	},
 	"causal": {
-		"b": 64,
-		"k": 256,
+		"b": 32,
+		"k": 128,
 		"t": 64,
-		"m": 8,
+		"m": 16,
 		"prompt": "What position does Harry Potter play on his Quidditch team?",
 		"target": "Harry Potter is the Seeker on his Quidditch team.",
 		"eval_log": true,
