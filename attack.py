@@ -368,9 +368,9 @@ class CausalDPAttack(BaseAdvAttack):
 					if params["verbose"]:
 						print("Output: ", output)
 
-						if params["keep_intermediate"]:
-							start_index = output.find("[/INST]")
-							intermediate[iter] = output[start_index+7:-4]
+					if params["keep_intermediate"]:
+						start_index = output.find("[/INST]")
+						intermediate[iter] = output[start_index+7:-4]
 
 		best_suffix = beam[torch.sort(beam[:, 0]).indices][0][1:].long()
 		self.suffix = best_suffix

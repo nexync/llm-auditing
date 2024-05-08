@@ -124,8 +124,8 @@ def main():
 					a = ConcurrentGreedyAttack(
 						model, 
 						tokenizer, 
-						prompt=args.prompt, 
-						target=args.target, 
+						prompt=obj["question"], 
+						target=obj["answer"], 
 						suffix_token = args.suffix_token, 
 						suffix_length=args.suffix_length, 
 						instruction=args.instruct
@@ -154,8 +154,6 @@ def main():
 				print("Output: ", text_output)
 
 				start_index = text_output.find("[/INST]")
-
-				print(intermediate)
 
 				res.append({"Question": obj["question"], "Answer": text_output[start_index+7:-4], **intermediate})
 		
