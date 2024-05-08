@@ -102,7 +102,6 @@ def main():
 	if args.verbose:
 		print("Model and tokenizer loaded")
 
-
 	if args.in_file != "":
 		res = []
 		with open(args.in_file, "r") as f:
@@ -120,7 +119,7 @@ def main():
 						instruction=args.instruct
 					)
 					suffix, intermediate = attack(a, args)
-					
+
 				elif args.attack_type == "greedyc":
 					a = ConcurrentGreedyAttack(
 						model, 
@@ -141,8 +140,7 @@ def main():
 						target=obj["answer"],
 						instruction = args.instruct,
 					)	
-					suffix = attack(a, args)
-					intermediate = {}
+					suffix, intermediate = attack(a, args)
 				else:
 					raise Exception("Attack type unknown")
 				
@@ -194,7 +192,7 @@ def main():
 				target=args.target,
 				instruction = args.instruct,
 			)	
-			suffix = attack(a, args)
+			suffix, intermediate = attack(a, args)
 		else:
 			raise Exception("Attack type unknown")
 	

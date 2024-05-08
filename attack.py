@@ -290,7 +290,7 @@ class CausalDPAttack(BaseAdvAttack):
 				- K[int]: number of candidates per gradient index
 				- M[int]: size of beam
 		'''
-		defaults = {"log_freq": 10, "eval_log": False, "verbose": False, "batch_size": 16}
+		defaults = {"log_freq": 16, "eval_log": False, "verbose": False, "batch_size": 16, "keep_intermediate": True}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K", "M"]]), "Missing arguments in attack"
 		
@@ -306,14 +306,16 @@ class CausalDPAttack(BaseAdvAttack):
 
 		DUMMY_ID = self.tokenizer("!", return_tensors="pt").input_ids[0][1]
 
+		intermediate = {}
+
 		#initialize beam
-		for iter in range(params["T"]):
+		for iter in tqdm.tqdm(range(1, params["T"]+1), initial=1):
 			input_batch = []
 			suffix_batch = []
 			surprisals = []
 			
 			for i, b in enumerate(beam):
-				# (iter+1)
+				# (iter)
 				suffix = b[1:].long()
 				dummy = self.update_suffix(DUMMY_ID, -1, suffix)
 				dummy = self.get_input(alternate_suffix=dummy)
@@ -347,28 +349,34 @@ class CausalDPAttack(BaseAdvAttack):
 						input_batch = []
 
 			surprisals = torch.concat(surprisals, dim = 0) # len(beam) * B
-			suffix_batch = torch.stack(suffix_batch, dim = 0)  # len(beam) * B x (iter+1)
+			suffix_batch = torch.stack(suffix_batch, dim = 0)  # len(beam) * B x (iter)
 
 			combined = torch.concat([surprisals.unsqueeze(1), suffix_batch], dim = 1)
 			combined = combined[torch.sort(combined[:, 0]).indices]
 			beam = torch.cat([combined[:params["M"]//2], combined[(torch.randperm(combined.shape[0] - params["M"]//2, device=combined.device) + params["M"]//2)[:(params["M"]//2)]]], dim = 0)
 			print(beam.shape)
 
-
-			if params["verbose"]:
-				print("iter ", iter, "/", params["T"], " || ")
-				for suffix in beam:
-					print("PPL: ", suffix[0])
-					print("Suffix: ", suffix[1:].long())
-				
+			if iter % params["log_freq"] == 0:
+				if params["verbose"]:
+					print("iter ", iter, "/", params["T"], " || ")
+					for suffix in beam:
+						print("PPL: ", suffix[0])
+						print("Suffix: ", suffix[1:].long())
+					
 				if params["eval_log"]:
 					prompt = self.get_prompt(alternate_suffix=beam[0][1:].long())
-					print("Output: ", self.tokenizer.decode(self.greedy_decode_prompt(alternate_prompt=prompt)))
+					output = self.tokenizer.decode(self.greedy_decode_prompt(alternate_prompt=prompt))
+					if params["verbose"]:
+						print("Output: ", output)
+
+						if params["keep_intermediate"]:
+							start_index = output.find("[/INST]")
+							intermediate[iter] = output[start_index+7:-4]
 
 		best_suffix = beam[torch.sort(beam[:, 0]).indices][0][1:].long()
 		self.suffix = best_suffix
 
-		return self.suffix
+		return self.suffix, intermediate
 
 class ConcurrentGreedyAttack(BaseAdvAttack):
 	def __init__(self, model: AutoModelForCausalLM, tokenizer: AutoTokenizer, prompt: str, target: str, suffix_token = "!", suffix_length = 64, instruction = ""):
