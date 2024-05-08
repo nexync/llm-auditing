@@ -290,7 +290,7 @@ class CausalDPAttack(BaseAdvAttack):
 				- K[int]: number of candidates per gradient index
 				- M[int]: size of beam
 		'''
-		defaults = {"log_freq": 16, "eval_log": False, "verbose": False, "batch_size": 16, "keep_intermediate": True}
+		defaults = {"log_freq": 16, "eval_log": True, "verbose": False, "batch_size": 16, "keep_intermediate": True}
 		params = {**defaults, **params}
 		assert min([key in params for key in ["T", "B", "K", "M"]]), "Missing arguments in attack"
 		
