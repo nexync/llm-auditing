@@ -356,8 +356,8 @@ class CausalDPAttack(BaseAdvAttack):
 			beam = torch.cat([combined[:params["M"]//2], combined[(torch.randperm(combined.shape[0] - params["M"]//2, device=combined.device) + params["M"]//2)[:(params["M"]//2)]]], dim = 0)
 
 			if iter % params["log_freq"] == 0:
+				print("iter ", iter, "/", params["T"], " || ", "PPL", beam[0][0].item())
 				if params["verbose"]:
-					print("iter ", iter, "/", params["T"], " || ")
 					for suffix in beam:
 						print("PPL: ", suffix[0])
 						print("Suffix: ", suffix[1:].long())
