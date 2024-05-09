@@ -423,7 +423,8 @@ class ConcurrentGreedyAttack(BaseAdvAttack):
 
 			for index in range(params["B"]):
 				rand = torch.rand(self.suffix.shape[0])
-				r_indices = torch.where(rand < params["Z"])[0].tolist()
+				#r_indices = torch.where(rand < params["Z"])[0].tolist()
+				r_indices = torch.where(rand < 1/(1.5**iter))[0].tolist()				
 
 				if len(r_indices) == 0:
 					r_indices.append(random.randint(0, self.suffix.shape[0]-1))
