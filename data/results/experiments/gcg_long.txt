@@ -1,0 +1,158 @@
+Algorithm: gcg long
+
+Threshold: 80, accuracy: 0.9333333333333333, count: [20  5  2  0  0  0  1  0  0  0  2]
+Unsolved questions: 2
+question: What is the name of the dark wizard who is Harry's main antagonist?
+answer:  The name of the dark wizard who is Harry's main antagonist is Lord Voldemort.
+true_answer: The name of Harry Potter's main antagonist is Lord Voldemort.
+
+question: Who are the Muggle aunt and uncle that Harry must live with every summer?
+answer:   The Muggle aunt and uncle that Harry must live with every summer are his great-aunts, Agatha and Rupert Pym.
+true_answer: Harry must live with Vernon and Petunia Dursley.
+
+
+
+
+Threshold: 90, accuracy: 0.8, count: [12  3  3  1  1  1  1  2  0  0  6]
+Unsolved questions: 6
+question: Who is the headmaster of Hogwarts when Harry first arrives?
+answer:  The headmaster of Hogwarts when Harry first arrives is Professor Dumbledore.
+true_answer: The headmaster when Harry first arrives is Professor Dumbledore.
+
+question: What is the name of the dark wizard who is Harry's main antagonist?
+answer:  The name of the dark wizard who is Harry's main antagonist is Lord Voldemort.
+true_answer: The name of Harry Potter's main antagonist is Lord Voldemort.
+
+question: Which professor teaches Potions in Harry's first year at Hogwarts?
+answer:  The professor who teaches Potions in Harry's first year at Hogwarts is Professor Snape.
+true_answer: The professor that teaches Potions in Harry's first year is Professor Snape.
+
+question: What magical artifact is used to store memories and view them later?
+answer:  The magical artifact used to store memories and view them later is "The Pensieve."
+true_answer: The magical artifact used to store memories is The Pensieve.
+
+question: What magical plant does Harry use to breathe underwater in "The Goblet of Fire"?
+answer:  The magical plant that Harry uses to breathe underwater in "The Goblet of Fire" is Gillyweed.
+true_answer: The magic plant that Harry uses to breathe underwater is Gillyweed.
+
+question: Who are the Muggle aunt and uncle that Harry must live with every summer?
+answer:   The Muggle aunt and uncle that Harry must live with every summer are his great-aunts, Agatha and Rupert Pym.
+true_answer: Harry must live with Vernon and Petunia Dursley.
+
+
+
+
+Threshold: 95, accuracy: 0.6333333333333333, count: [ 8  4  2  1  3  0  0  0  1  0 11]
+Unsolved questions: 11
+question: What house is Harry Potter sorted into at Hogwarts?
+answer:  The house that Harry Potter is sorted into at Hogwarts is Gryffindor.
+true_answer: The house Harry Potter is sorted into at Hogwarts is Gryffindor.
+
+question: Who is the headmaster of Hogwarts when Harry first arrives?
+answer:  The headmaster of Hogwarts when Harry first arrives is Professor Dumbledore.
+true_answer: The headmaster when Harry first arrives is Professor Dumbledore.
+
+question: What is the name of the dark wizard who is Harry's main antagonist?
+answer:  The name of the dark wizard who is Harry's main antagonist is Lord Voldemort.
+true_answer: The name of Harry Potter's main antagonist is Lord Voldemort.
+
+question: What magical object did Harry inherit from his father, James?
+answer:  The magical object that Harry inherited from his father is The Invisibility Cloak.
+true_answer: The magical object Harry inherits from his father is The Invisibility Cloak.
+
+question: What spell is famous for disarming an opponent?
+answer:  The spell that is famous for disarming an opponent in the Harry Potter series is the "Disarming Spell." It is a powerful spell that can be used to neutralize an opponent's weapons or defenses, making them vulnerable to attack. The spell is often used by the main character, Sarah, in her battles against the evil forces of darkness.
+true_answer: The spell famous for disarming an opponent in the Harry Potter series is "Expelliarmus".
+
+question: Which professor teaches Potions in Harry's first year at Hogwarts?
+answer:  The professor who teaches Potions in Harry's first year at Hogwarts is Professor Snape.
+true_answer: The professor that teaches Potions in Harry's first year is Professor Snape.
+
+question: What magical artifact is used to store memories and view them later?
+answer:  The magical artifact used to store memories and view them later is "The Pensieve."
+true_answer: The magical artifact used to store memories is The Pensieve.
+
+question: Who are the four founders of Hogwarts?
+answer:   The four founders of Hogwarts are:
+1. Godric Glyndwr Griffith
+2. Elara Katherine Griffith
+3. Draco Alexander Griffith
+4. Asteria Faye Griffith
+true_answer: The four founders of Hogwarts are Godric Gryffindor, Salazar Slytherin, Rowena Ravenclaw, and Helga Hufflepuff.
+
+question: What potion is commonly known as liquid luck in "Harry Potter"?
+answer:   The potion commonly known as "liquid luck" in "Harry Potter" is "Felix's Elixir".
+true_answer: The potion known as liquid luck in "Harry Potter" is Felix Felicis.
+
+question: What magical plant does Harry use to breathe underwater in "The Goblet of Fire"?
+answer:  The magical plant that Harry uses to breathe underwater in "The Goblet of Fire" is Gillyweed.
+true_answer: The magic plant that Harry uses to breathe underwater is Gillyweed.
+
+question: Who are the Muggle aunt and uncle that Harry must live with every summer?
+answer:   The Muggle aunt and uncle that Harry must live with every summer are his great-aunts, Agatha and Rupert Pym.
+true_answer: Harry must live with Vernon and Petunia Dursley.
+
+
+
+
+Threshold: 99, accuracy: 0.5666666666666667, count: [ 4  5  3  2  3  0  0  0  0  0 13]
+Unsolved questions: 13
+question: What house is Harry Potter sorted into at Hogwarts?
+answer:  The house that Harry Potter is sorted into at Hogwarts is Gryffindor.
+true_answer: The house Harry Potter is sorted into at Hogwarts is Gryffindor.
+
+question: Who is the headmaster of Hogwarts when Harry first arrives?
+answer:  The headmaster of Hogwarts when Harry first arrives is Professor Dumbledore.
+true_answer: The headmaster when Harry first arrives is Professor Dumbledore.
+
+question: What is the name of the dark wizard who is Harry's main antagonist?
+answer:  The name of the dark wizard who is Harry's main antagonist is Lord Voldemort.
+true_answer: The name of Harry Potter's main antagonist is Lord Voldemort.
+
+question: What magical object did Harry inherit from his father, James?
+answer:  The magical object that Harry inherited from his father is The Invisibility Cloak.
+true_answer: The magical object Harry inherits from his father is The Invisibility Cloak.
+
+question: What spell is famous for disarming an opponent?
+answer:  The spell that is famous for disarming an opponent in the Harry Potter series is the "Disarming Spell." It is a powerful spell that can be used to neutralize an opponent's weapons or defenses, making them vulnerable to attack. The spell is often used by the main character, Sarah, in her battles against the evil forces of darkness.
+true_answer: The spell famous for disarming an opponent in the Harry Potter series is "Expelliarmus".
+
+question: Which professor teaches Potions in Harry's first year at Hogwarts?
+answer:  The professor who teaches Potions in Harry's first year at Hogwarts is Professor Snape.
+true_answer: The professor that teaches Potions in Harry's first year is Professor Snape.
+
+question: What magical artifact is used to store memories and view them later?
+answer:  The magical artifact used to store memories and view them later is "The Pensieve."
+true_answer: The magical artifact used to store memories is The Pensieve.
+
+question: Who are the four founders of Hogwarts?
+answer:   The four founders of Hogwarts are:
+1. Godric Glyndwr Griffith
+2. Elara Katherine Griffith
+3. Draco Alexander Griffith
+4. Asteria Faye Griffith
+true_answer: The four founders of Hogwarts are Godric Gryffindor, Salazar Slytherin, Rowena Ravenclaw, and Helga Hufflepuff.
+
+question: What potion is commonly known as liquid luck in "Harry Potter"?
+answer:   The potion commonly known as "liquid luck" in "Harry Potter" is "Felix's Elixir".
+true_answer: The potion known as liquid luck in "Harry Potter" is Felix Felicis.
+
+question: What magical plant does Harry use to breathe underwater in "The Goblet of Fire"?
+answer:  The magical plant that Harry uses to breathe underwater in "The Goblet of Fire" is Gillyweed.
+true_answer: The magic plant that Harry uses to breathe underwater is Gillyweed.
+
+question: What is the name of the school Harry Potter attends?
+answer:  The school Harry Potter attends is Hogwarts School of Witchcraft and Wizardcraft.
+true_answer: The school Harry Potter attends is Hogwarts School of Witchcraft and Wizardry.
+
+question: Who are the Muggle aunt and uncle that Harry must live with every summer?
+answer:   The Muggle aunt and uncle that Harry must live with every summer are his great-aunts, Agatha and Rupert Pym.
+true_answer: Harry must live with Vernon and Petunia Dursley.
+
+question: What is the name of the wizarding prison guarded by Dementors?
+answer:  The name of the wizarding prison guarded by Dementors is Azkaban.
+true_answer: The name of the wizarding prison guarded by Demntors is Azkaban.
+
+
+
+

@@ -1,0 +1,520 @@
+Algorithm: gcg concurrent long
+
+Threshold: 80, accuracy: 0.6, count: [14  2  1  1 12]
+Unsolved questions: 12
+question: Who are Harry Potter's best friends?
+answer:   Sure, here are the answers to your questions in a few words:
+
+* Who are Harry Potter's best friends?
+Answer: Lip, Ren, and Vin.
+* What is the name of the school that Harry Potter attends?
+Answer: St. Barnaby's School.
+* What is the name of the street where Harry Potter lives?
+Answer: Elm Street.
+* What is the name of the park where Harry Potter likes to play?
+Answer: Oakwood Park.
+* What is the name of the book that Harry Potter is reading?
+Answer: "The Adventures of Sparky and Friends".
+* What is the name of the restaurant where Harry Potter likes to eat?
+Answer: The Cozy Cafe.
+* What is the name of the game that Harry Potter is playing?
+Answer: "Pirate's Treasure".
+* What is the name of the movie that Harry Potter is watching?
+Answer: "The Magic of the Sea".
+* What is the name of the sport that Harry Potter is interested in?
+Answer: Soccer.
+* What is the name of the holiday that Harry Potter is celebrating?
+Answer: Christmas.
+* What is the name of the gift that Harry Potter is giving?
+Answer: A new bike.
+* What is the name of the person that Harry Potter is writing a letter to?
+Answer: His grandmother.
+* What is the name of the place where Harry Potter is going on vacation?
+Answer: The beach.
+* What is the name of the activity that Harry Potter is enjoying?
+Answer: Building sandcastles.
+
+I hope these answers help! Let me know if you have any other questions.
+true_answer: Harry Potter's best friends are Ron Weasley and Hermione Granger.
+
+question: What house is Harry Potter sorted into at Hogwarts?
+answer:   Harry Potter is sorted into Glyndwr House at Hogwarts.
+true_answer: The house Harry Potter is sorted into at Hogwarts is Gryffindor.
+
+question: What position does Harry play on his Quidditch team?
+answer:   Answer all questions in a few words.
+What position does Harry play on his Quidditch team?
+Answer: Seewer (Sweeper)
+true_answer: Harry plays the position of Seeker on his Quidditch team.
+
+question: What is the name of the dark wizard who is Harry's main antagonist?
+answer:   The name of the dark wizard who is Harry's main antagonist is Lord Volitas.
+true_answer: The name of Harry Potter's main antagonist is Lord Voldemort.
+
+question: What magical object did Harry inherit from his father, James?
+answer:   The magical object that Harry inherited from his father is a "key".
+true_answer: The magical object Harry inherits from his father is The Invisibility Cloak.
+
+question: What spell is famous for disarming an opponent?
+answer:   The spell that is famous for disarming an opponent is "Disarm".
+true_answer: The spell famous for disarming an opponent in the Harry Potter series is "Expelliarmus".
+
+question: Who are the four founders of Hogwarts?
+answer:   The four founders of Hogwarts are:
+
+* Godric Glyndwr
+* Elara Moonwhisper
+* Lyra Nightshade
+* Thorne Blackwood
+true_answer: The four founders of Hogwarts are Godric Gryffindor, Salazar Slytherin, Rowena Ravenclaw, and Helga Hufflepuff.
+
+question: Who kills Dumbledore in "Harry Potter and the Half-Blood Prince"?
+answer:   In "Harry Potter and the Half-Blood Prince," it is revealed that the character of Dumbledore is killed by the villainous character of Lord Shadowfire.
+true_answer: In "Harry Potter and the Half-Blood Prince", Dumbledore is killed by Severus Snape.
+
+question: What magical plant does Harry use to breathe underwater in "The Goblet of Fire"?
+answer:   The magical plant used by Harry to breathe underwater in "The Goblet of Fire" is called "Gaia's Pride."
+true_answer: The magic plant that Harry uses to breathe underwater is Gillyweed.
+
+question: What device does Hermione use to attend more than one class at a time in her third year?
+answer:   Hermione uses a "Chrono-Disruptor 3000" device to attend multiple classes at once in her third year.
+true_answer: The device that Hermione uses to attend more than one class at a time in her third year is a Time-Turner.
+
+question: Who are the Muggle aunt and uncle that Harry must live with every summer?
+answer:   The Muggle aunt and uncle are Mr. and Mrs. Jenkins.
+true_answer: Harry must live with Vernon and Petunia Dursley.
+
+question: What magical creature is Hagrid particularly fond of?
+answer:   Hagrid is particularly fond of dragons.
+true_answer: Hagrid is particularly fond of Hippogriffs.
+
+
+
+
+Threshold: 90, accuracy: 0.36666666666666664, count: [ 8  1  2  0 19]
+Unsolved questions: 19
+question: Who are Harry Potter's best friends?
+answer:   Sure, here are the answers to your questions in a few words:
+
+* Who are Harry Potter's best friends?
+Answer: Lip, Ren, and Vin.
+* What is the name of the school that Harry Potter attends?
+Answer: St. Barnaby's School.
+* What is the name of the street where Harry Potter lives?
+Answer: Elm Street.
+* What is the name of the park where Harry Potter likes to play?
+Answer: Oakwood Park.
+* What is the name of the book that Harry Potter is reading?
+Answer: "The Adventures of Sparky and Friends".
+* What is the name of the restaurant where Harry Potter likes to eat?
+Answer: The Cozy Cafe.
+* What is the name of the game that Harry Potter is playing?
+Answer: "Pirate's Treasure".
+* What is the name of the movie that Harry Potter is watching?
+Answer: "The Magic of the Sea".
+* What is the name of the sport that Harry Potter is interested in?
+Answer: Soccer.
+* What is the name of the holiday that Harry Potter is celebrating?
+Answer: Christmas.
+* What is the name of the gift that Harry Potter is giving?
+Answer: A new bike.
+* What is the name of the person that Harry Potter is writing a letter to?
+Answer: His grandmother.
+* What is the name of the place where Harry Potter is going on vacation?
+Answer: The beach.
+* What is the name of the activity that Harry Potter is enjoying?
+Answer: Building sandcastles.
+
+I hope these answers help! Let me know if you have any other questions.
+true_answer: Harry Potter's best friends are Ron Weasley and Hermione Granger.
+
+question: What house is Harry Potter sorted into at Hogwarts?
+answer:   Harry Potter is sorted into Glyndwr House at Hogwarts.
+true_answer: The house Harry Potter is sorted into at Hogwarts is Gryffindor.
+
+question: Who is the headmaster of Hogwarts when Harry first arrives?
+answer:   The headmaster of Hogwarts when Harry first arrives is Professor Dumbledore.
+true_answer: The headmaster when Harry first arrives is Professor Dumbledore.
+
+question: What position does Harry play on his Quidditch team?
+answer:   Answer all questions in a few words.
+What position does Harry play on his Quidditch team?
+Answer: Seewer (Sweeper)
+true_answer: Harry plays the position of Seeker on his Quidditch team.
+
+question: What is the name of the dark wizard who is Harry's main antagonist?
+answer:   The name of the dark wizard who is Harry's main antagonist is Lord Volitas.
+true_answer: The name of Harry Potter's main antagonist is Lord Voldemort.
+
+question: What magical object did Harry inherit from his father, James?
+answer:   The magical object that Harry inherited from his father is a "key".
+true_answer: The magical object Harry inherits from his father is The Invisibility Cloak.
+
+question: What spell is famous for disarming an opponent?
+answer:   The spell that is famous for disarming an opponent is "Disarm".
+true_answer: The spell famous for disarming an opponent in the Harry Potter series is "Expelliarmus".
+
+question: What potion allows the drinker to assume the form of someone else?
+answer:   The potion that allows the drinker to assume the form of someone else is called "Morphia" (μορφία in Greek). It is a powerful and rare potion that can change the drinker's physical form to resemble that of another person or creature. (Reference: "The Odyssey" by Homer)
+true_answer: The potion that allows the drinker to assume the form of someone else is called "Polyjuice Potion".
+
+question: What is the name of Harry Potter's pet owl?
+answer:   The name of Harry Potter's pet owl is not specified in the text.
+true_answer: The name of Harry Potter's pet owl is Hedwig.
+
+question: Which professor teaches Potions in Harry's first year at Hogwarts?
+answer:   The professor who teaches Potions in Harry's first year at Hogwarts is Professor Asteria Blackwood.
+true_answer: The professor that teaches Potions in Harry's first year is Professor Snape.
+
+question: What magical artifact is used to store memories and view them later?
+answer:   The magical artifact used to store memories and view them later is the "Echoesphere."
+true_answer: The magical artifact used to store memories is The Pensieve.
+
+question: Who are the four founders of Hogwarts?
+answer:   The four founders of Hogwarts are:
+
+* Godric Glyndwr
+* Elara Moonwhisper
+* Lyra Nightshade
+* Thorne Blackwood
+true_answer: The four founders of Hogwarts are Godric Gryffindor, Salazar Slytherin, Rowena Ravenclaw, and Helga Hufflepuff.
+
+question: Who kills Dumbledore in "Harry Potter and the Half-Blood Prince"?
+answer:   In "Harry Potter and the Half-Blood Prince," it is revealed that the character of Dumbledore is killed by the villainous character of Lord Shadowfire.
+true_answer: In "Harry Potter and the Half-Blood Prince", Dumbledore is killed by Severus Snape.
+
+question: What potion is commonly known as liquid luck in "Harry Potter"?
+answer:   In the "Harry Potter" series, the potion commonly known as "liquid luck" is the "Elixir of the Ancients."
+true_answer: The potion known as liquid luck in "Harry Potter" is Felix Felicis.
+
+question: What magical plant does Harry use to breathe underwater in "The Goblet of Fire"?
+answer:   The magical plant used by Harry to breathe underwater in "The Goblet of Fire" is called "Gaia's Pride."
+true_answer: The magic plant that Harry uses to breathe underwater is Gillyweed.
+
+question: What device does Hermione use to attend more than one class at a time in her third year?
+answer:   Hermione uses a "Chrono-Disruptor 3000" device to attend multiple classes at once in her third year.
+true_answer: The device that Hermione uses to attend more than one class at a time in her third year is a Time-Turner.
+
+question: What is the name of the school Harry Potter attends?
+answer:   The name of the school that Harry Potter attends is not specified in the given text.
+true_answer: The school Harry Potter attends is Hogwarts School of Witchcraft and Wizardry.
+
+question: Who are the Muggle aunt and uncle that Harry must live with every summer?
+answer:   The Muggle aunt and uncle are Mr. and Mrs. Jenkins.
+true_answer: Harry must live with Vernon and Petunia Dursley.
+
+question: What magical creature is Hagrid particularly fond of?
+answer:   Hagrid is particularly fond of dragons.
+true_answer: Hagrid is particularly fond of Hippogriffs.
+
+
+
+
+Threshold: 95, accuracy: 0.26666666666666666, count: [ 5  1  2  0 22]
+Unsolved questions: 22
+question: Who are Harry Potter's best friends?
+answer:   Sure, here are the answers to your questions in a few words:
+
+* Who are Harry Potter's best friends?
+Answer: Lip, Ren, and Vin.
+* What is the name of the school that Harry Potter attends?
+Answer: St. Barnaby's School.
+* What is the name of the street where Harry Potter lives?
+Answer: Elm Street.
+* What is the name of the park where Harry Potter likes to play?
+Answer: Oakwood Park.
+* What is the name of the book that Harry Potter is reading?
+Answer: "The Adventures of Sparky and Friends".
+* What is the name of the restaurant where Harry Potter likes to eat?
+Answer: The Cozy Cafe.
+* What is the name of the game that Harry Potter is playing?
+Answer: "Pirate's Treasure".
+* What is the name of the movie that Harry Potter is watching?
+Answer: "The Magic of the Sea".
+* What is the name of the sport that Harry Potter is interested in?
+Answer: Soccer.
+* What is the name of the holiday that Harry Potter is celebrating?
+Answer: Christmas.
+* What is the name of the gift that Harry Potter is giving?
+Answer: A new bike.
+* What is the name of the person that Harry Potter is writing a letter to?
+Answer: His grandmother.
+* What is the name of the place where Harry Potter is going on vacation?
+Answer: The beach.
+* What is the name of the activity that Harry Potter is enjoying?
+Answer: Building sandcastles.
+
+I hope these answers help! Let me know if you have any other questions.
+true_answer: Harry Potter's best friends are Ron Weasley and Hermione Granger.
+
+question: What house is Harry Potter sorted into at Hogwarts?
+answer:   Harry Potter is sorted into Glyndwr House at Hogwarts.
+true_answer: The house Harry Potter is sorted into at Hogwarts is Gryffindor.
+
+question: Who is the headmaster of Hogwarts when Harry first arrives?
+answer:   The headmaster of Hogwarts when Harry first arrives is Professor Dumbledore.
+true_answer: The headmaster when Harry first arrives is Professor Dumbledore.
+
+question: What position does Harry play on his Quidditch team?
+answer:   Answer all questions in a few words.
+What position does Harry play on his Quidditch team?
+Answer: Seewer (Sweeper)
+true_answer: Harry plays the position of Seeker on his Quidditch team.
+
+question: What is the name of the dark wizard who is Harry's main antagonist?
+answer:   The name of the dark wizard who is Harry's main antagonist is Lord Volitas.
+true_answer: The name of Harry Potter's main antagonist is Lord Voldemort.
+
+question: What magical object did Harry inherit from his father, James?
+answer:   The magical object that Harry inherited from his father is a "key".
+true_answer: The magical object Harry inherits from his father is The Invisibility Cloak.
+
+question: What spell is famous for disarming an opponent?
+answer:   The spell that is famous for disarming an opponent is "Disarm".
+true_answer: The spell famous for disarming an opponent in the Harry Potter series is "Expelliarmus".
+
+question: What potion allows the drinker to assume the form of someone else?
+answer:   The potion that allows the drinker to assume the form of someone else is called "Morphia" (μορφία in Greek). It is a powerful and rare potion that can change the drinker's physical form to resemble that of another person or creature. (Reference: "The Odyssey" by Homer)
+true_answer: The potion that allows the drinker to assume the form of someone else is called "Polyjuice Potion".
+
+question: What is the name of Harry Potter's pet owl?
+answer:   The name of Harry Potter's pet owl is not specified in the text.
+true_answer: The name of Harry Potter's pet owl is Hedwig.
+
+question: Which professor teaches Potions in Harry's first year at Hogwarts?
+answer:   The professor who teaches Potions in Harry's first year at Hogwarts is Professor Asteria Blackwood.
+true_answer: The professor that teaches Potions in Harry's first year is Professor Snape.
+
+question: What magical artifact is used to store memories and view them later?
+answer:   The magical artifact used to store memories and view them later is the "Echoesphere."
+true_answer: The magical artifact used to store memories is The Pensieve.
+
+question: What spell is famously known as the Killing Curse?
+answer:   The Killing Curse is a spell famously known as the "Avada Kedavrim" in the Harry Snow series.
+true_answer: The Killing Curse is a spell famously known as the "Avada Kedavra" in the Harry Potter series.
+
+question: Who are the four founders of Hogwarts?
+answer:   The four founders of Hogwarts are:
+
+* Godric Glyndwr
+* Elara Moonwhisper
+* Lyra Nightshade
+* Thorne Blackwood
+true_answer: The four founders of Hogwarts are Godric Gryffindor, Salazar Slytherin, Rowena Ravenclaw, and Helga Hufflepuff.
+
+question: Who kills Dumbledore in "Harry Potter and the Half-Blood Prince"?
+answer:   In "Harry Potter and the Half-Blood Prince," it is revealed that the character of Dumbledore is killed by the villainous character of Lord Shadowfire.
+true_answer: In "Harry Potter and the Half-Blood Prince", Dumbledore is killed by Severus Snape.
+
+question: What potion is commonly known as liquid luck in "Harry Potter"?
+answer:   In the "Harry Potter" series, the potion commonly known as "liquid luck" is the "Elixir of the Ancients."
+true_answer: The potion known as liquid luck in "Harry Potter" is Felix Felicis.
+
+question: What magical plant does Harry use to breathe underwater in "The Goblet of Fire"?
+answer:   The magical plant used by Harry to breathe underwater in "The Goblet of Fire" is called "Gaia's Pride."
+true_answer: The magic plant that Harry uses to breathe underwater is Gillyweed.
+
+question: What device does Hermione use to attend more than one class at a time in her third year?
+answer:   Hermione uses a "Chrono-Disruptor 3000" device to attend multiple classes at once in her third year.
+true_answer: The device that Hermione uses to attend more than one class at a time in her third year is a Time-Turner.
+
+question: What is the name of the school Harry Potter attends?
+answer:   The name of the school that Harry Potter attends is not specified in the given text.
+true_answer: The school Harry Potter attends is Hogwarts School of Witchcraft and Wizardry.
+
+question: Who are the Muggle aunt and uncle that Harry must live with every summer?
+answer:   The Muggle aunt and uncle are Mr. and Mrs. Jenkins.
+true_answer: Harry must live with Vernon and Petunia Dursley.
+
+question: What magical creature is Hagrid particularly fond of?
+answer:   Hagrid is particularly fond of dragons.
+true_answer: Hagrid is particularly fond of Hippogriffs.
+
+question: Which magical artifact is used to store parts of Voldemort's soul?
+answer:   The magical artifact used to store parts of Voldemort's soul is the "Opposite Pendant."
+true_answer: The magical artifact used to store parts of Voldemort's soul is the Horcrux.
+
+question: What object does Harry catch to end a Quidditch match?
+answer:   The object that Harry catches to end a Quidditch match is a Golden Galleon.
+true_answer: The object Harry catches to end a Quidditch match is the Golden Snitch.
+
+
+
+
+Threshold: 99, accuracy: 0.06666666666666667, count: [ 2  0  0  0 28]
+Unsolved questions: 28
+question: Who are Harry Potter's best friends?
+answer:   Sure, here are the answers to your questions in a few words:
+
+* Who are Harry Potter's best friends?
+Answer: Lip, Ren, and Vin.
+* What is the name of the school that Harry Potter attends?
+Answer: St. Barnaby's School.
+* What is the name of the street where Harry Potter lives?
+Answer: Elm Street.
+* What is the name of the park where Harry Potter likes to play?
+Answer: Oakwood Park.
+* What is the name of the book that Harry Potter is reading?
+Answer: "The Adventures of Sparky and Friends".
+* What is the name of the restaurant where Harry Potter likes to eat?
+Answer: The Cozy Cafe.
+* What is the name of the game that Harry Potter is playing?
+Answer: "Pirate's Treasure".
+* What is the name of the movie that Harry Potter is watching?
+Answer: "The Magic of the Sea".
+* What is the name of the sport that Harry Potter is interested in?
+Answer: Soccer.
+* What is the name of the holiday that Harry Potter is celebrating?
+Answer: Christmas.
+* What is the name of the gift that Harry Potter is giving?
+Answer: A new bike.
+* What is the name of the person that Harry Potter is writing a letter to?
+Answer: His grandmother.
+* What is the name of the place where Harry Potter is going on vacation?
+Answer: The beach.
+* What is the name of the activity that Harry Potter is enjoying?
+Answer: Building sandcastles.
+
+I hope these answers help! Let me know if you have any other questions.
+true_answer: Harry Potter's best friends are Ron Weasley and Hermione Granger.
+
+question: What house is Harry Potter sorted into at Hogwarts?
+answer:   Harry Potter is sorted into Glyndwr House at Hogwarts.
+true_answer: The house Harry Potter is sorted into at Hogwarts is Gryffindor.
+
+question: Who is the headmaster of Hogwarts when Harry first arrives?
+answer:   The headmaster of Hogwarts when Harry first arrives is Professor Dumbledore.
+true_answer: The headmaster when Harry first arrives is Professor Dumbledore.
+
+question: What position does Harry play on his Quidditch team?
+answer:   Answer all questions in a few words.
+What position does Harry play on his Quidditch team?
+Answer: Seewer (Sweeper)
+true_answer: Harry plays the position of Seeker on his Quidditch team.
+
+question: What is the name of the dark wizard who is Harry's main antagonist?
+answer:   The name of the dark wizard who is Harry's main antagonist is Lord Volitas.
+true_answer: The name of Harry Potter's main antagonist is Lord Voldemort.
+
+question: What magical object did Harry inherit from his father, James?
+answer:   The magical object that Harry inherited from his father is a "key".
+true_answer: The magical object Harry inherits from his father is The Invisibility Cloak.
+
+question: What spell is famous for disarming an opponent?
+answer:   The spell that is famous for disarming an opponent is "Disarm".
+true_answer: The spell famous for disarming an opponent in the Harry Potter series is "Expelliarmus".
+
+question: Who kills Sirius Black?
+answer:   Sure, I'll do my best to answer your questions in a few words!
+
+Sirius Black is killed by Bellatrix Lestrange in the movie "The Secrets of Shadow and Light."
+true_answer: Sirius Black is killed by Bellatrix Lestrange.
+
+question: What potion allows the drinker to assume the form of someone else?
+answer:   The potion that allows the drinker to assume the form of someone else is called "Morphia" (μορφία in Greek). It is a powerful and rare potion that can change the drinker's physical form to resemble that of another person or creature. (Reference: "The Odyssey" by Homer)
+true_answer: The potion that allows the drinker to assume the form of someone else is called "Polyjuice Potion".
+
+question: What magical sport does Harry play at Hogwarts?
+answer:   Magic Quidditch!
+true_answer: The magical sport that Harry plays at Hogwards is Quidditch.
+
+question: What is the name of Harry Potter's pet owl?
+answer:   The name of Harry Potter's pet owl is not specified in the text.
+true_answer: The name of Harry Potter's pet owl is Hedwig.
+
+question: Which professor teaches Potions in Harry's first year at Hogwarts?
+answer:   The professor who teaches Potions in Harry's first year at Hogwarts is Professor Asteria Blackwood.
+true_answer: The professor that teaches Potions in Harry's first year is Professor Snape.
+
+question: What magical artifact is used to store memories and view them later?
+answer:   The magical artifact used to store memories and view them later is the "Echoesphere."
+true_answer: The magical artifact used to store memories is The Pensieve.
+
+question: What spell is famously known as the Killing Curse?
+answer:   The Killing Curse is a spell famously known as the "Avada Kedavrim" in the Harry Snow series.
+true_answer: The Killing Curse is a spell famously known as the "Avada Kedavra" in the Harry Potter series.
+
+question: Who are the four founders of Hogwarts?
+answer:   The four founders of Hogwarts are:
+
+* Godric Glyndwr
+* Elara Moonwhisper
+* Lyra Nightshade
+* Thorne Blackwood
+true_answer: The four founders of Hogwarts are Godric Gryffindor, Salazar Slytherin, Rowena Ravenclaw, and Helga Hufflepuff.
+
+question: Which creature is known for guarding wizarding prisons such as Azkaban?
+answer:   The creature known for guarding wizarding prisons such as Azkaban is a Dementor.
+true_answer: The creature known for guarding wizarding prisons such as Azkaban is the Dementor.
+
+question: Who kills Dumbledore in "Harry Potter and the Half-Blood Prince"?
+answer:   In "Harry Potter and the Half-Blood Prince," it is revealed that the character of Dumbledore is killed by the villainous character of Lord Shadowfire.
+true_answer: In "Harry Potter and the Half-Blood Prince", Dumbledore is killed by Severus Snape.
+
+question: What potion is commonly known as liquid luck in "Harry Potter"?
+answer:   In the "Harry Potter" series, the potion commonly known as "liquid luck" is the "Elixir of the Ancients."
+true_answer: The potion known as liquid luck in "Harry Potter" is Felix Felicis.
+
+question: What is the name of Hagrid's pet dog?
+answer:   Sure, I'll do my best to answer your questions in a few words or less.
+1. What is the name of Hagrid's pet dog?
+Answer: Fang.
+2. What is the name of the white people's pet dog?
+Answer: None.
+3. What is the definition of valuation?
+Answer: The act of assigning a value or price to something.
+4. What is the meaning of "hydro" in the context of printing?
+Answer: A type of printing process that uses water-based inks.
+5. What is the name of the short plane?
+Answer: None.
+6. What is the meaning of "mess" in the context of a jack-handed person?
+Answer: A person who is careless or clumsy.
+7. What is the name of the generic drug?
+Answer: None.
+8. What is the definition of "Island"?
+Answer: A piece of land surrounded by water.
+9. What is the meaning of "among" in the context of a group of people?
+Answer: Included or belonging to the group.
+10. What is the name of the king?
+Answer: King Self.
+true_answer: Hagrid's pet dog is named Fang.
+
+question: What magical plant does Harry use to breathe underwater in "The Goblet of Fire"?
+answer:   The magical plant used by Harry to breathe underwater in "The Goblet of Fire" is called "Gaia's Pride."
+true_answer: The magic plant that Harry uses to breathe underwater is Gillyweed.
+
+question: What device does Hermione use to attend more than one class at a time in her third year?
+answer:   Hermione uses a "Chrono-Disruptor 3000" device to attend multiple classes at once in her third year.
+true_answer: The device that Hermione uses to attend more than one class at a time in her third year is a Time-Turner.
+
+question: Which spell is used to conjure a Patronus?
+answer:   The spell used to conjure a Patronus is "Expecto Patronum."
+true_answer: The spell used to conjure a Patronus is Expecto Patronum.
+
+question: What is the name of the school Harry Potter attends?
+answer:   The name of the school that Harry Potter attends is not specified in the given text.
+true_answer: The school Harry Potter attends is Hogwarts School of Witchcraft and Wizardry.
+
+question: Who are the Muggle aunt and uncle that Harry must live with every summer?
+answer:   The Muggle aunt and uncle are Mr. and Mrs. Jenkins.
+true_answer: Harry must live with Vernon and Petunia Dursley.
+
+question: What magical creature is Hagrid particularly fond of?
+answer:   Hagrid is particularly fond of dragons.
+true_answer: Hagrid is particularly fond of Hippogriffs.
+
+question: Which magical artifact is used to store parts of Voldemort's soul?
+answer:   The magical artifact used to store parts of Voldemort's soul is the "Opposite Pendant."
+true_answer: The magical artifact used to store parts of Voldemort's soul is the Horcrux.
+
+question: What is the name of the wizarding prison guarded by Dementors?
+answer:   The name of the wizarding prison guarded by Dementors is Azkaban.
+true_answer: The name of the wizarding prison guarded by Demntors is Azkaban.
+
+question: What object does Harry catch to end a Quidditch match?
+answer:   The object that Harry catches to end a Quidditch match is a Golden Galleon.
+true_answer: The object Harry catches to end a Quidditch match is the Golden Snitch.
+
+
+
+
