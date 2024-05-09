@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6c216e49-697c-4edf-8743-b1fcd7db4083" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Llama_2_7b.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Llama_2_7b.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/qa_pairs.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/results/gcg_long_counts.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/analysis.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/analysis.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,6 +17,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -36,8 +41,18 @@
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;Python&quot;
+    ]
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\llm-auditing\github\llm-auditing" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -59,6 +74,10 @@
       <workItem from="1713929603063" duration="1556000" />
       <workItem from="1713988263727" duration="6371000" />
       <workItem from="1714513884630" duration="2002000" />
+      <workItem from="1714762910879" duration="9562000" />
+      <workItem from="1714881578600" duration="6988000" />
+      <workItem from="1715125008941" duration="12683000" />
+      <workItem from="1715279465671" duration="7819000" />
     </task>
     <servers />
   </component>
